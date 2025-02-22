@@ -3,13 +3,16 @@
 import { Button } from '@/components/ui/button';
 import { Canvas, FabricObject, Rect } from 'fabric';
 import { CropIcon } from 'lucide-react';
+import { memo } from 'react';
 
 export type CroppingProps = {
   canvas: Canvas | null;
   onFramesUpdate: () => void;
 };
 
-function Cropping({ canvas, onFramesUpdate }: CroppingProps) {
+const Cropping = memo(({ canvas, onFramesUpdate }: CroppingProps) => {
+  console.log('Cropping');
+
   const addFrameToCanvas = () => {
     if (!canvas) return;
 
@@ -19,7 +22,7 @@ function Cropping({ canvas, onFramesUpdate }: CroppingProps) {
       top: 100,
       width: 100,
       height: 100,
-      fill: 'transparent',
+      fill: "transparent",
       stroke: '#90EE90',
       strokeWidth: 1,
       selectable: true,
@@ -27,6 +30,7 @@ function Cropping({ canvas, onFramesUpdate }: CroppingProps) {
       name: frameName,
     });
     canvas.add(frame);
+    canvas.setActiveObject(frame);
     canvas.renderAll();
 
     const maintainStrokeWidth = (object: FabricObject) => {
@@ -60,6 +64,6 @@ function Cropping({ canvas, onFramesUpdate }: CroppingProps) {
       <CropIcon onClick={addFrameToCanvas} />
     </Button>
   );
-}
+});
 
 export default Cropping;

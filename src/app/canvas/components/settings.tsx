@@ -33,10 +33,10 @@ function Settings({ canvas }: SettingsProps) {
       });
 
       canvas.on('object:modified', (event) => {
-        handleObjectSelection(event?.target);
+        handleObjectSelection(event.target);
       });
       canvas.on('object:scaling', (event) => {
-        handleObjectSelection(event?.target);
+        handleObjectSelection(event.target);
       });
     }
   }, [canvas]);

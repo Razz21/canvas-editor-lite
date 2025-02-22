@@ -1,7 +1,15 @@
 'use client;';
 
-import { useEffect, useRef, useState } from 'react';
-import { Canvas, Rect, Circle, Line, Textbox } from 'fabric';
+import { useEffect, useRef, useState, useCallback, memo } from 'react';
+import {
+  Canvas,
+  Rect,
+  Circle,
+  Line,
+  Textbox,
+  BasicTransformEvent,
+  FabricObject,
+} from 'fabric';
 import { Button } from '@/components/ui/button';
 import { CircleIcon, SquareIcon, TypeIcon } from 'lucide-react';
 import Settings from './settings';
@@ -19,6 +27,20 @@ function CanvasBase({}: CanvasProps) {
   const [guidelines, setGuidelines] = useState<Line[]>([]);
   const [refreshKey, setRefreshKey] = useState<number>(0);
 
+  const handleObjectMovingCallback = (
+    event: BasicTransformEvent & { target: FabricObject }
+  ) => {
+    if (canvas) {
+      handleObjectMoving(canvas, event.target, guidelines, setGuidelines);
+    }
+  };
+
+  const handleObjectModifiedCallback = () => {
+    if (canvas) {
+      clearGuidelines(canvas, guidelines, setGuidelines);
+    }
+  };
+
   useEffect(() => {
     if (canvasRef.current) {
       const initCanvas = new Canvas(canvasRef.current, {
@@ -30,23 +52,21 @@ function CanvasBase({}: CanvasProps) {
 
       setCanvas(initCanvas);
 
-      initCanvas.on('object:moving', (event) => {
-        handleObjectMoving(initCanvas, event.target, guidelines, setGuidelines);
-      });
+      initCanvas.on('object:moving', handleObjectMovingCallback);
 
-      initCanvas.on('object:modified', (event) => {
-        clearGuidelines(initCanvas, guidelines, setGuidelines);
-      });
-
-      return () => {
-        initCanvas.dispose();
-      };
+      initCanvas.on('object:modified', handleObjectModifiedCallback);
     }
+    return () => {
+      console.warn('Canvas disposed');
+      canvas?.off('object:moving', handleObjectMovingCallback);
+      canvas?.off('object:modified', handleObjectModifiedCallback);
+      canvas?.dispose();
+    };
   }, []);
 
-  const handleFrameUpdate = () => {
+  const handleFrameUpdate = useCallback(() => {
     setRefreshKey((prev) => prev + 1);
-  };
+  }, []);
 
   return (
     <div>
@@ -74,9 +94,7 @@ function CanvasBase({}: CanvasProps) {
 
 export default CanvasBase;
 
-function AddObjects({ canvas }: { canvas: Canvas | null }) {
-  if (!canvas) return null;
-
+const AddObjects = memo(({ canvas }: { canvas: Canvas | null }) => {
   function addRectangle() {
     if (!canvas) return;
 
@@ -133,4 +151,4 @@ function AddObjects({ canvas }: { canvas: Canvas | null }) {
       </Button>
     </>
   );
-}
+});
