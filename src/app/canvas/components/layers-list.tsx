@@ -1,13 +1,23 @@
 'use client;';
 
+import { Button } from '@/components/ui/button';
 import { Canvas, FabricObject } from 'fabric';
 import { useEffect, useState } from 'react';
+import {
+  ArrowUpIcon,
+  ArrowDownIcon,
+  EyeIcon,
+  EyeClosedIcon,
+} from 'lucide-react';
 
 export type LayerListProps = {
   canvas: Canvas | null;
 };
 
-export type LayerItem = Pick<FabricObject, 'id' | 'zIndex' | 'type'>;
+export type LayerItem = Pick<
+  FabricObject,
+  'id' | 'zIndex' | 'type' | 'opacity'
+>;
 
 // TODO: extract this to a separate file
 const addIdToObject = (object: FabricObject) => {
@@ -28,9 +38,70 @@ Canvas.prototype.updateZIndices = function () {
 
 function LayersList({ canvas }: LayerListProps) {
   const [layers, setLayers] = useState<LayerItem[]>([]);
-  const [selectedLayer, setSelectedLayer] = useState<LayerItem['id'] | null>(
-    null
-  );
+  const [selectedLayer, setSelectedLayer] = useState<LayerItem | null>(null);
+
+  const hideSelectedLayer = () => {
+    if (!selectedLayer || !canvas) return;
+
+    const object = canvas
+      .getObjects()
+      .find((obj) => obj.id === selectedLayer.id);
+
+    if (!object) return;
+
+    if (object.opacity === 0) {
+      object.opacity = object.prevOpacity ?? 1;
+      object.prevOpacity = undefined;
+    } else {
+      object.prevOpacity = object.opacity || 1;
+      object.opacity = 0;
+    }
+
+    canvas.renderAll();
+    updateLayers();
+
+    setSelectedLayer({ ...selectedLayer, opacity: object.opacity });
+  };
+
+  const moveSelectedLayer = (direction: 'up' | 'down') => {
+    if (!selectedLayer || !canvas) return;
+
+    const objects = canvas?.getObjects();
+
+    const object = objects?.find((obj) => obj.id === selectedLayer.id);
+
+    if (!(object && objects)) return;
+
+    const currentIndex = objects.indexOf(object);
+    if (direction === 'up' && currentIndex < objects.length - 1) {
+      const temp = objects[currentIndex];
+      objects[currentIndex] = objects[currentIndex + 1];
+      objects[currentIndex + 1] = temp;
+    } else if (direction === 'down' && currentIndex > 0) {
+      const temp = objects[currentIndex];
+      objects[currentIndex] = objects[currentIndex - 1];
+      objects[currentIndex - 1] = temp;
+    }
+
+    const bgColor = canvas.backgroundColor;
+    canvas.clear();
+
+    objects.forEach((obj) => canvas.add(obj));
+
+    canvas.backgroundColor = bgColor;
+
+    canvas.renderAll();
+
+    objects.forEach((obj, index) => {
+      obj.zIndex = index;
+    });
+
+    canvas.setActiveObject(object);
+
+    canvas.renderAll();
+
+    updateLayers();
+  };
 
   const updateLayers = () => {
     if (!canvas) return;
@@ -48,6 +119,7 @@ function LayersList({ canvas }: LayerListProps) {
         id: obj.id,
         zIndex: obj.zIndex,
         type: obj.type,
+        opacity: obj.opacity,
       }));
 
     setLayers(() => [...objects].reverse());
@@ -58,9 +130,17 @@ function LayersList({ canvas }: LayerListProps) {
   >(
     e: SelectionEvent
   ) => {
-    const selectedId = e.selected?.[0]?.id ?? null;
-
-    setSelectedLayer(selectedId);
+    const selectedObject = e.selected?.[0] ?? null;
+    if (!selectedObject) {
+      setSelectedLayer(null);
+      return;
+    }
+    setSelectedLayer({
+      id: selectedObject.id,
+      zIndex: selectedObject.zIndex,
+      type: selectedObject.type,
+      opacity: selectedObject.opacity,
+    });
   };
 
   const selectLayerInCanvas = (id: LayerItem['id']) => {
@@ -71,7 +151,12 @@ function LayersList({ canvas }: LayerListProps) {
       setSelectedLayer(null);
       return;
     }
-    setSelectedLayer(object.id);
+    setSelectedLayer({
+      id: object.id,
+      zIndex: object.zIndex,
+      type: object.type,
+      opacity: object.opacity,
+    });
     canvas?.setActiveObject(object);
     canvas?.renderAll();
   };
@@ -101,12 +186,35 @@ function LayersList({ canvas }: LayerListProps) {
 
   return (
     <div className="bg-background p-4 rounded shadow-md space-y-4">
+      <div className="flex gap-4">
+        <Button
+          onClick={() => moveSelectedLayer('up')}
+          size="icon"
+          disabled={!selectedLayer}
+        >
+          <ArrowUpIcon />
+        </Button>
+        <Button
+          onClick={() => moveSelectedLayer('down')}
+          size="icon"
+          disabled={!selectedLayer}
+        >
+          <ArrowDownIcon />
+        </Button>
+        <Button
+          onClick={hideSelectedLayer}
+          size="icon"
+          disabled={!selectedLayer}
+        >
+          {selectedLayer?.opacity === 0 ? <EyeClosedIcon /> : <EyeIcon />}
+        </Button>
+      </div>
       <ul>
         {layers.map((layer) => (
           <li
             key={layer.id}
             className={`${
-              layer.id === selectedLayer ? 'bg-gray-200/50' : ''
+              layer.id === selectedLayer?.id ? 'bg-gray-200/50' : ''
             } p-2 rounded`}
             onClick={() => selectLayerInCanvas(layer.id)}
           >

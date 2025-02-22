@@ -17,6 +17,8 @@ function Settings({ canvas }: SettingsProps) {
   const [height, setHeight] = useState<string>('');
   const [radius, setRadius] = useState<string>('');
   const [color, setColor] = useState<string>('');
+  const [opacity, setOpacity] = useState<string>('');
+
   useEffect(() => {
     if (canvas) {
       canvas.on('selection:created', (event) => {
@@ -44,6 +46,8 @@ function Settings({ canvas }: SettingsProps) {
 
     setSelectedObject(object);
 
+    setOpacity(object.opacity.toString());
+
     switch (object.type) {
       case 'rect':
         setWidth(Math.round(object.width * object.scaleX).toString());
@@ -59,6 +63,12 @@ function Settings({ canvas }: SettingsProps) {
         setWidth('');
         setHeight('');
         break;
+      case 'textbox':
+        setColor(object.fill?.toString() ?? '');
+        setRadius('');
+        setWidth('');
+        setHeight('');
+        break;
       default:
         clearSettings();
         break;
@@ -71,6 +81,7 @@ function Settings({ canvas }: SettingsProps) {
     setHeight('');
     setRadius('');
     setColor('');
+    setOpacity('');
   };
   const handleWidthChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.value.replace(/,/g, '');
@@ -114,6 +125,16 @@ function Settings({ canvas }: SettingsProps) {
     }
   };
 
+  const handleOpacityChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    setOpacity(value);
+
+    if (selectedObject) {
+      selectedObject.set({ opacity: value });
+      canvas?.renderAll();
+    }
+  };
+
   if (!selectedObject) return null;
 
   return (
@@ -128,10 +149,6 @@ function Settings({ canvas }: SettingsProps) {
             <span>Height</span>
             <Input value={height} onChange={handleHeigthChange} />
           </Label>
-          <Label>
-            <span>Color</span>
-            <Input value={color} type="color" onChange={handleColorChange} />
-          </Label>
         </div>
       )}
       {selectedObject.type === 'circle' && (
@@ -140,11 +157,27 @@ function Settings({ canvas }: SettingsProps) {
             <span>Radius</span>
             <Input value={radius} onChange={handleRadiusChange} />
           </Label>
+        </div>
+      )}
+
+      {selectedObject && (
+        <>
           <Label>
             <span>Color</span>
             <Input value={color} type="color" onChange={handleColorChange} />
           </Label>
-        </div>
+          <Label>
+            <span>Opacity</span>
+            <Input
+              value={opacity}
+              min={0}
+              max={1}
+              step={0.01}
+              type="number"
+              onChange={handleOpacityChange}
+            />
+          </Label>
+        </>
       )}
     </div>
   );

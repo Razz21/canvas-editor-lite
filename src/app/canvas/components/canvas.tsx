@@ -1,9 +1,9 @@
 'use client;';
 
 import { useEffect, useRef, useState } from 'react';
-import { Canvas, Rect, Circle, Line } from 'fabric';
+import { Canvas, Rect, Circle, Line, Textbox } from 'fabric';
 import { Button } from '@/components/ui/button';
-import { CircleIcon, SquareIcon } from 'lucide-react';
+import { CircleIcon, SquareIcon, TypeIcon } from 'lucide-react';
 import Settings from './settings';
 import CanvasSettings from './canvas-settings';
 import { handleObjectMoving, clearGuidelines } from '../utils/snap';
@@ -98,6 +98,24 @@ function AddObjects({ canvas }: { canvas: Canvas | null }) {
       canvas.add(item);
     }
   }
+  function addTextBox() {
+    if (canvas) {
+      const item = new Textbox('Edit Text', {
+        width: 100,
+        fontSize: 20,
+        fill: '#000000',
+        left: 10,
+        top: 10,
+        lockScalingFlip: true,
+        lockScalingX: false,
+        lockScalingY: false,
+        editable: true,
+        fontFamily: 'Arial',
+        textAlign: 'left',
+      });
+      canvas.add(item);
+    }
+  }
   return (
     <>
       <Button onClick={addRectangle} variant="ghost" size="icon">
@@ -105,6 +123,9 @@ function AddObjects({ canvas }: { canvas: Canvas | null }) {
       </Button>
       <Button onClick={addCircle} variant="ghost" size="icon">
         <CircleIcon />
+      </Button>
+      <Button onClick={addTextBox} variant="ghost" size="icon">
+        <TypeIcon />
       </Button>
     </>
   );
