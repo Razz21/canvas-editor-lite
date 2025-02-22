@@ -1,80 +1,106 @@
-'use client;';
+'use client';
 
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Canvas } from 'fabric';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 export type CanvasSettingsProps = {
   canvas: Canvas | null;
 };
 
+type CanvasSettingsState = {
+  width: number;
+  height: number;
+  backgroundColor: string;
+};
+
+const initSettings: CanvasSettingsState = {
+  width: 500,
+  height: 500,
+  backgroundColor: '#ffffff',
+};
+
 function CanvasSettings({ canvas }: CanvasSettingsProps) {
-  const [canvasWidth, setCanvasWidth] = useState<number>(500);
-  const [canvasHeight, setCanvasHeight] = useState<number>(500);
-  const [canvasBgColor, setCanvasBgColor] = useState<string>('#ffffff');
+  const [canvasConfig, setCanvasConfig] =
+    useState<CanvasSettingsState>(initSettings);
 
-  useEffect(() => {
-    if (canvas) {
-      setCanvasWidth(canvasWidth);
-      setCanvasHeight(canvasHeight);
-      setCanvasBgColor(canvasBgColor);
-      canvas.renderAll();
-    }
-  }, [canvas, canvasWidth, canvasHeight, canvasBgColor]);
+  const updateCanvasConfig = (config: Partial<CanvasSettingsState>) => {
+    const updatedConfig = { ...canvasConfig, ...config };
+    canvas?.setDimensions(updatedConfig);
+    canvas?.set(updatedConfig);
 
-  const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/,/g, '');
-    const initValue = parseInt(value, 10);
+    setCanvasConfig(updatedConfig);
 
-    if (initValue > 0) {
-      setCanvasWidth(initValue);
-      canvas?.setDimensions({ width: initValue });
-      canvas?.renderAll();
-    }
+    canvas?.renderAll();
   };
 
-  const handleHeightChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.replace(/,/g, '');
-    const initValue = parseInt(value, 10);
+  const handleChange =
+    <Key extends keyof CanvasSettingsState>(
+      key: Key,
+      { numeric }: { numeric?: boolean } = {}
+    ) =>
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      let value = e.target.value.trim();
+      let parsedValue: string | number | undefined = value;
 
-    if (initValue > 0) {
-      setCanvasHeight(initValue);
-      canvas?.setDimensions({ height: initValue });
-      canvas?.renderAll();
-    }
-  };
+      if (numeric) {
+        parsedValue = clamp(parseIntValue(value), 1, Infinity);
+      }
 
-  const handleBgColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value.trim();
-
-    if (value) {
-      setCanvasBgColor(value);
-      canvas?.set({ backgroundColor: value });
-      canvas?.renderAll();
-    }
-  };
+      updateCanvasConfig({ [key]: parsedValue });
+    };
 
   return (
     <div className="flex flex-col gap-2 p-2 rounded bg-background">
-      <Label>
-        <span>Canvas Width</span>
-        <Input value={canvasWidth} onChange={handleWidthChange} />
-      </Label>
-      <Label>
-        <span>Canvas Height</span>
-        <Input value={canvasHeight} onChange={handleHeightChange} />
-      </Label>
-      <Label>
-        <span>Canvas Background</span>
-        <Input
-          value={canvasBgColor}
-          type="color"
-          onChange={handleBgColorChange}
-        />
-      </Label>
+      <Button onClick={() => updateCanvasConfig(initSettings)}>
+        <span>Reset</span>
+      </Button>
+      <div className="flex flex-col gap-2">
+        <Label>
+          <span>Canvas Width</span>
+          <Input
+            type="number"
+            value={canvasConfig.width}
+            onChange={handleChange('width', { numeric: true })}
+          />
+        </Label>
+        <Label>
+          <span>Canvas Height</span>
+          <Input
+            type="number"
+            value={canvasConfig.height}
+            onChange={handleChange('height', { numeric: true })}
+          />
+        </Label>
+        <Label>
+          <span>Canvas Background</span>
+          <Input
+            value={canvasConfig.backgroundColor}
+            type="color"
+            onChange={handleChange('backgroundColor')}
+          />
+        </Label>
+      </div>
     </div>
   );
 }
 
 export default CanvasSettings;
+
+function parseIntValue(value: string | number): number {
+  if (!value) return 0;
+
+  return typeof value === 'string' ? parseInt(value, 10) : Math.floor(value);
+}
+
+/**
+ * Clamp value between an upper and lower bound.
+ * @param {number} value input value
+ * @param {number} min mininum value
+ * @param {number} max maximum allowed value
+ */
+export function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
