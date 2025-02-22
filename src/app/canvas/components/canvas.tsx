@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Canvas, Rect, Circle, Line } from 'fabric';
 import { Button } from '@/components/ui/button';
-import { Circle as CircleIcon, Square as SquareIcon } from 'lucide-react';
+import { CircleIcon, SquareIcon } from 'lucide-react';
 import Settings from './settings';
 import CanvasSettings from './canvas-settings';
 import { handleObjectMoving, clearGuidelines } from '../utils/snap';
@@ -53,7 +53,7 @@ function CanvasBase({}: CanvasProps) {
         <div className="fixed top-1/2 -translate-y-1/2 left-4">
           <div className="flex flex-col gap-2 p-2 rounded bg-background">
             <Cropping canvas={canvas} onFramesUpdate={handleFrameUpdate} />
-            <Toolbar canvas={canvas} />
+            <AddObjects canvas={canvas} />
           </div>
         </div>
         <div className="fixed top-1/2 -translate-y-1/2 right-4 flex flex-col gap-4">
@@ -72,7 +72,7 @@ function CanvasBase({}: CanvasProps) {
 
 export default CanvasBase;
 
-function Toolbar({ canvas }: { canvas: Canvas | null }) {
+function AddObjects({ canvas }: { canvas: Canvas | null }) {
   function addRectangle() {
     if (canvas) {
       const item = new Rect({
