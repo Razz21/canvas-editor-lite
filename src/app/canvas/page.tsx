@@ -6,9 +6,5 @@ export type PageProps = {
 };
 
 export default function Page({}: PageProps) {
-  return (
-    <div>
-      <PageClient />
-    </div>
-  );
+  return <PageClient />;
 }

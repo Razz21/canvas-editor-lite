@@ -3,58 +3,51 @@
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Canvas } from 'fabric';
-import { useState } from 'react';
+import { CanvasOptions } from 'fabric';
+import { INIT_CANVAS_OPTIONS, useCanvasStore } from '../stores/canvas-store';
+import { useShallow } from 'zustand/react/shallow';
+import { clamp, parseIntValue } from '../utils/numbers';
 
-export type CanvasSettingsProps = {
-  canvas: Canvas | null;
-};
+export type CanvasSettingsProps = {};
 
-type CanvasSettingsState = {
-  width: number;
-  height: number;
-  backgroundColor: string;
-};
+function CanvasSettings({}: CanvasSettingsProps) {
+  const { canvas, options, setOptions } = useCanvasStore(
+    useShallow((state) => ({
+      canvas: state.canvas,
+      options: state.options,
+      setOptions: state.setOptions,
+    }))
+  );
 
-const initSettings: CanvasSettingsState = {
-  width: 500,
-  height: 500,
-  backgroundColor: '#ffffff',
-};
+  const updateCanvasConfig = (config: Partial<CanvasOptions>) => {
+    const updatedConfig = { ...options, ...config };
 
-function CanvasSettings({ canvas }: CanvasSettingsProps) {
-  const [canvasConfig, setCanvasConfig] =
-    useState<CanvasSettingsState>(initSettings);
-
-  const updateCanvasConfig = (config: Partial<CanvasSettingsState>) => {
-    const updatedConfig = { ...canvasConfig, ...config };
     canvas?.setDimensions(updatedConfig);
     canvas?.set(updatedConfig);
 
-    setCanvasConfig(updatedConfig);
+    setOptions(updatedConfig);
 
     canvas?.renderAll();
   };
 
-  const handleChange =
-    <Key extends keyof CanvasSettingsState>(
+  const handleChangeOption =
+    <Key extends keyof CanvasOptions>(
       key: Key,
       { numeric }: { numeric?: boolean } = {}
     ) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      let value = e.target.value.trim();
-      let parsedValue: string | number | undefined = value;
+      let value: string | number | undefined = e.target.value.trim()
 
       if (numeric) {
-        parsedValue = clamp(parseIntValue(value), 1, Infinity);
+        value = clamp(parseIntValue(value), 1, Infinity);
       }
 
-      updateCanvasConfig({ [key]: parsedValue });
+      updateCanvasConfig({ [key]: value });
     };
 
   return (
     <div className="flex flex-col gap-2 p-2 rounded bg-background">
-      <Button onClick={() => updateCanvasConfig(initSettings)}>
+      <Button onClick={() => updateCanvasConfig(INIT_CANVAS_OPTIONS)}>
         <span>Reset</span>
       </Button>
       <div className="flex flex-col gap-2">
@@ -62,24 +55,24 @@ function CanvasSettings({ canvas }: CanvasSettingsProps) {
           <span>Canvas Width</span>
           <Input
             type="number"
-            value={canvasConfig.width}
-            onChange={handleChange('width', { numeric: true })}
+            value={options.width}
+            onChange={handleChangeOption('width', { numeric: true })}
           />
         </Label>
         <Label>
           <span>Canvas Height</span>
           <Input
             type="number"
-            value={canvasConfig.height}
-            onChange={handleChange('height', { numeric: true })}
+            value={options.height}
+            onChange={handleChangeOption('height', { numeric: true })}
           />
         </Label>
         <Label>
           <span>Canvas Background</span>
           <Input
-            value={canvasConfig.backgroundColor}
+            value={options.backgroundColor as string}
             type="color"
-            onChange={handleChange('backgroundColor')}
+            onChange={handleChangeOption('backgroundColor')}
           />
         </Label>
       </div>
@@ -88,19 +81,3 @@ function CanvasSettings({ canvas }: CanvasSettingsProps) {
 }
 
 export default CanvasSettings;
-
-function parseIntValue(value: string | number): number {
-  if (!value) return 0;
-
-  return typeof value === 'string' ? parseInt(value, 10) : Math.floor(value);
-}
-
-/**
- * Clamp value between an upper and lower bound.
- * @param {number} value input value
- * @param {number} min mininum value
- * @param {number} max maximum allowed value
- */
-export function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
-}

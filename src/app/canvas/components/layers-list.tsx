@@ -10,6 +10,7 @@ import {
   EyeClosedIcon,
   TrashIcon,
 } from 'lucide-react';
+import { isGuidelineObject } from '../utils/snap';
 
 export type LayerListProps = {
   canvas: Canvas | null;
@@ -124,11 +125,7 @@ function LayersList({ canvas }: LayerListProps) {
 
     const objects = canvas
       .getObjects()
-      .filter((obj) => {
-        return !(
-          obj.id?.startsWith('vertical-') || obj.id?.startsWith('horizontal-')
-        );
-      })
+      .filter((obj) => !isGuidelineObject(obj))
       .map((obj) => ({
         id: obj.id,
         zIndex: obj.zIndex,

@@ -2,12 +2,7 @@ import { Canvas, FabricObject, Line } from 'fabric';
 
 const spappingDistance = 10;
 
-export const handleObjectMoving = (
-  canvas: Canvas,
-  object: FabricObject,
-  guidelines: Line[],
-  setGuidelines: (guidelines: Line[]) => void
-) => {
+export const handleObjectMoving = (canvas: Canvas, object: FabricObject) => {
   const canvasWidth = canvas.width;
   const canvasHeight = canvas.height;
 
@@ -20,7 +15,7 @@ export const handleObjectMoving = (
   const centerY = top + (object.height * object.scaleY) / 2;
 
   let newGuidelines = [];
-  clearGuidelines(canvas, guidelines, setGuidelines);
+  clearGuidelines(canvas);
 
   let snapped = false;
 
@@ -107,9 +102,7 @@ export const handleObjectMoving = (
   }
 
   if (!snapped) {
-    clearGuidelines(canvas, guidelines, setGuidelines);
-  } else {
-    setGuidelines(newGuidelines);
+    clearGuidelines(canvas);
   }
   canvas.renderAll();
 };
@@ -146,27 +139,25 @@ export const createHorizontalGuideline = (
   });
 };
 
-export const clearGuidelines = (
-  canvas: Canvas,
-  guidelines: Line[],
-  setGuidelines: (guidelines: Line[]) => void
-) => {
-  const objects = canvas.getObjects('line') as any[];
+export const clearGuidelines = (canvas: Canvas) => {
+  const objects = canvas.getObjects('line');
 
   objects.forEach((object) => {
-    if (
-      object.id.startsWith('horizontal-') ||
-      object.id.startsWith('vertical-')
-    ) {
+    if (isGuidelineObject(object)) {
       canvas.remove(object);
     }
   });
-  //   setGuidelines([]);
   canvas.renderAll();
 };
 
 const guidelineExists = (canvas: Canvas, id: string) => {
-  const objects = canvas.getObjects('line') as any[];
+  const objects = canvas.getObjects('line');
 
   return objects.some((object) => object.id === id);
+};
+
+export const isGuidelineObject = (object: FabricObject) => {
+  return (
+    object.id?.startsWith('horizontal-') || object.id?.startsWith('vertical-')
+  );
 };
