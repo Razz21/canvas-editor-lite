@@ -9,6 +9,7 @@ import CanvasSettings from './canvas-settings';
 import { handleObjectMoving, clearGuidelines } from '../utils/snap';
 import Cropping from './cropping';
 import CroppingSettings from './cropping-settings';
+import LayersList from './layers-list';
 
 export type CanvasProps = {};
 
@@ -60,6 +61,7 @@ function CanvasBase({}: CanvasProps) {
           <Settings canvas={canvas} />
           <CanvasSettings canvas={canvas} />
           <CroppingSettings canvas={canvas} refreshKey={refreshKey} />
+          <LayersList canvas={canvas} />
         </div>
       </div>
       <canvas
@@ -78,7 +80,7 @@ function AddObjects({ canvas }: { canvas: Canvas | null }) {
       const item = new Rect({
         width: 100,
         height: 100,
-        fill: '#000',
+        fill: '#000000',
         left: 10,
         top: 10,
       });
@@ -89,7 +91,7 @@ function AddObjects({ canvas }: { canvas: Canvas | null }) {
     if (canvas) {
       const item = new Circle({
         radius: 50,
-        fill: '#000',
+        fill: '#000000',
         left: 10,
         top: 10,
       });
