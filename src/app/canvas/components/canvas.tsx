@@ -7,6 +7,8 @@ import { Circle as CircleIcon, Square as SquareIcon } from 'lucide-react';
 import Settings from './settings';
 import CanvasSettings from './canvas-settings';
 import { handleObjectMoving, clearGuidelines } from '../utils/snap';
+import Cropping from './cropping';
+import CroppingSettings from './cropping-settings';
 
 export type CanvasProps = {};
 
@@ -14,6 +16,7 @@ function CanvasBase({}: CanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [canvas, setCanvas] = useState<Canvas | null>(null);
   const [guidelines, setGuidelines] = useState<Line[]>([]);
+  const [refreshKey, setRefreshKey] = useState<number>(0);
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -40,15 +43,23 @@ function CanvasBase({}: CanvasProps) {
     }
   }, []);
 
+  const handleFrameUpdate = () => {
+    setRefreshKey((prev) => prev + 1);
+  };
+
   return (
     <div>
       <div className="z-20 relative">
         <div className="fixed top-1/2 -translate-y-1/2 left-4">
-          <Toolbar canvas={canvas} />
+          <div className="flex flex-col gap-2 p-2 rounded bg-background">
+            <Cropping canvas={canvas} onFramesUpdate={handleFrameUpdate} />
+            <Toolbar canvas={canvas} />
+          </div>
         </div>
         <div className="fixed top-1/2 -translate-y-1/2 right-4 flex flex-col gap-4">
           <Settings canvas={canvas} />
           <CanvasSettings canvas={canvas} />
+          <CroppingSettings canvas={canvas} refreshKey={refreshKey} />
         </div>
       </div>
       <canvas
@@ -86,13 +97,13 @@ function Toolbar({ canvas }: { canvas: Canvas | null }) {
     }
   }
   return (
-    <div className="flex flex-col gap-2 p-2 rounded bg-background">
+    <>
       <Button onClick={addRectangle} variant="ghost" size="icon">
         <SquareIcon />
       </Button>
       <Button onClick={addCircle} variant="ghost" size="icon">
         <CircleIcon />
       </Button>
-    </div>
+    </>
   );
 }

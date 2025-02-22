@@ -43,7 +43,7 @@ function Settings({ canvas }: SettingsProps) {
     if (!object) return;
 
     setSelectedObject(object);
-    console.log('handleObjectSelection', object);
+
     switch (object.type) {
       case 'rect':
         setWidth(Math.round(object.width * object.scaleX).toString());
