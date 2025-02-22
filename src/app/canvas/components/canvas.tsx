@@ -75,46 +75,50 @@ function CanvasBase({}: CanvasProps) {
 export default CanvasBase;
 
 function AddObjects({ canvas }: { canvas: Canvas | null }) {
+  if (!canvas) return null;
+
   function addRectangle() {
-    if (canvas) {
-      const item = new Rect({
-        width: 100,
-        height: 100,
-        fill: '#000000',
-        left: 10,
-        top: 10,
-      });
-      canvas.add(item);
-    }
+    if (!canvas) return;
+
+    const item = new Rect({
+      width: 100,
+      height: 100,
+      fill: '#000000',
+      left: 10,
+      top: 10,
+    });
+    canvas.add(item);
+    canvas.setActiveObject(item);
   }
   function addCircle() {
-    if (canvas) {
-      const item = new Circle({
-        radius: 50,
-        fill: '#000000',
-        left: 10,
-        top: 10,
-      });
-      canvas.add(item);
-    }
+    if (!canvas) return;
+    const item = new Circle({
+      radius: 50,
+      fill: '#000000',
+      left: 10,
+      top: 10,
+    });
+    canvas.add(item);
+    canvas.setActiveObject(item);
   }
   function addTextBox() {
-    if (canvas) {
-      const item = new Textbox('Edit Text', {
-        width: 100,
-        fontSize: 20,
-        fill: '#000000',
-        left: 10,
-        top: 10,
-        lockScalingFlip: true,
-        lockScalingX: false,
-        lockScalingY: false,
-        editable: true,
-        fontFamily: 'Arial',
-        textAlign: 'left',
-      });
-      canvas.add(item);
-    }
+    if (!canvas) return;
+
+    const item = new Textbox('Edit Text', {
+      width: 100,
+      fontSize: 20,
+      fill: '#000000',
+      left: 10,
+      top: 10,
+      lockScalingFlip: true,
+      lockScalingX: false,
+      lockScalingY: false,
+      editable: true,
+      fontFamily: 'Arial',
+      textAlign: 'left',
+    });
+    canvas.add(item);
+    canvas.setActiveObject(item);
   }
   return (
     <>
