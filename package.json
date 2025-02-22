@@ -43,6 +43,7 @@
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.5.2",
     "fabric": "^6.6.1",
+    "immer": "^10.1.1",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.475.0",
     "next": "15.1.7",
@@ -57,7 +58,8 @@
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^1.1.2",
-    "zod": "^3.24.2"
+    "zod": "^3.24.2",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
