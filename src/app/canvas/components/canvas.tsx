@@ -52,7 +52,7 @@ function CanvasBase({}: CanvasProps) {
     <div>
       <div className="z-20 relative">
         <div className="fixed top-1/2 -translate-y-1/2 left-4">
-          <div className="flex flex-col gap-2 p-2 rounded bg-background">
+          <div className="flex flex-col gap-1 p-2 rounded bg-background">
             <Cropping canvas={canvas} onFramesUpdate={handleFrameUpdate} />
             <AddObjects canvas={canvas} />
           </div>

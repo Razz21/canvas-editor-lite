@@ -12,14 +12,16 @@ export type CanvasSettingsProps = {
 function CanvasSettings({ canvas }: CanvasSettingsProps) {
   const [canvasWidth, setCanvasWidth] = useState<number>(500);
   const [canvasHeight, setCanvasHeight] = useState<number>(500);
+  const [canvasBgColor, setCanvasBgColor] = useState<string>('#ffffff');
 
   useEffect(() => {
     if (canvas) {
       setCanvasWidth(canvasWidth);
       setCanvasHeight(canvasHeight);
+      setCanvasBgColor(canvasBgColor);
       canvas.renderAll();
     }
-  }, [canvas, canvasWidth, canvasHeight]);
+  }, [canvas, canvasWidth, canvasHeight, canvasBgColor]);
 
   const handleWidthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/,/g, '');
@@ -27,7 +29,7 @@ function CanvasSettings({ canvas }: CanvasSettingsProps) {
 
     if (initValue > 0) {
       setCanvasWidth(initValue);
-      canvas?.setWidth(initValue);
+      canvas?.setDimensions({ width: initValue });
       canvas?.renderAll();
     }
   };
@@ -38,7 +40,17 @@ function CanvasSettings({ canvas }: CanvasSettingsProps) {
 
     if (initValue > 0) {
       setCanvasHeight(initValue);
-      canvas?.setHeight(initValue);
+      canvas?.setDimensions({ height: initValue });
+      canvas?.renderAll();
+    }
+  };
+
+  const handleBgColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.trim();
+
+    if (value) {
+      setCanvasBgColor(value);
+      canvas?.set({ backgroundColor: value });
       canvas?.renderAll();
     }
   };
@@ -52,6 +64,14 @@ function CanvasSettings({ canvas }: CanvasSettingsProps) {
       <Label>
         <span>Canvas Height</span>
         <Input value={canvasHeight} onChange={handleHeightChange} />
+      </Label>
+      <Label>
+        <span>Canvas Background</span>
+        <Input
+          value={canvasBgColor}
+          type="color"
+          onChange={handleBgColorChange}
+        />
       </Label>
     </div>
   );

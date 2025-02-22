@@ -8,6 +8,7 @@ import {
   ArrowDownIcon,
   EyeIcon,
   EyeClosedIcon,
+  TrashIcon,
 } from 'lucide-react';
 
 export type LayerListProps = {
@@ -61,6 +62,19 @@ function LayersList({ canvas }: LayerListProps) {
     updateLayers();
 
     setSelectedLayer({ ...selectedLayer, opacity: object.opacity });
+  };
+
+  const removeLayer = (layer: LayerItem) => {
+    if (!canvas) return;
+
+    const object = canvas.getObjects().find((obj) => obj.id === layer.id);
+
+    if (!object) return;
+
+    canvas.remove(object);
+    canvas.renderAll();
+
+    updateLayers();
   };
 
   const moveSelectedLayer = (direction: 'up' | 'down') => {
@@ -147,7 +161,7 @@ function LayersList({ canvas }: LayerListProps) {
     const object = canvas?.getObjects().find((obj) => obj.id === id);
 
     if (!object) {
-      debugger;
+      // debugger;
       setSelectedLayer(null);
       return;
     }
@@ -215,10 +229,19 @@ function LayersList({ canvas }: LayerListProps) {
             key={layer.id}
             className={`${
               layer.id === selectedLayer?.id ? 'bg-gray-200/50' : ''
-            } p-2 rounded`}
+            } p-2 rounded flex justify-between items-center`}
             onClick={() => selectLayerInCanvas(layer.id)}
           >
-            {layer.type} ({layer.zIndex})
+            <span>
+              {layer.type} ({layer.zIndex})
+            </span>
+            <Button
+              onClick={() => removeLayer(layer)}
+              size="icon"
+              variant="secondary"
+            >
+              <TrashIcon />
+            </Button>
           </li>
         ))}
       </ul>
