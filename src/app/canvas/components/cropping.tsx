@@ -20,7 +20,7 @@ function Cropping({ canvas, onFramesUpdate }: CroppingProps) {
       width: 100,
       height: 100,
       fill: 'transparent',
-      stroke: 'black',
+      stroke: '#90EE90',
       strokeWidth: 1,
       selectable: true,
       evented: true,

@@ -106,7 +106,7 @@ function CroppingSettings({ canvas, refreshKey }: CroppingSettingsProps) {
           ))}
         </SelectContent>
       </Select>
-      <Button onClick={exportFrameAsPNG}>
+      <Button onClick={exportFrameAsPNG} className='w-full'>
         <DownloadIcon /> Export as PNG
       </Button>
     </div>
