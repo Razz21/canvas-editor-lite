@@ -15,6 +15,7 @@ export interface ElementsState {
     updates: Partial<Omit<ElementObject, 'id'>>
   ) => void;
   removeElement: (id: ElementObject['id']) => void;
+  setElements: (elements: ElementObject[]) => void;
 }
 
 export const useElementsStore = create<ElementsState>()(
@@ -37,6 +38,7 @@ export const useElementsStore = create<ElementsState>()(
         set((state) => ({
           elements: state.elements.filter((el) => el.id !== id),
         })),
+      setElements: (elements) => set({ elements }),
     }),
     { name: 'ElementsStore' }
   )

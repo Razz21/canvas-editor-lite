@@ -11,13 +11,14 @@ import {
   TrashIcon,
 } from 'lucide-react';
 import { isGuidelineObject } from '../utils/snap';
+import { useCanvasStore } from '../stores/canvas-store';
+import { ElementObject, useElementsStore } from '../stores/elements-store';
+import { useShallow } from 'zustand/react/shallow';
 
-export type LayerListProps = {
-  canvas: Canvas | null;
-};
+export type LayerProps = {};
 
 export type LayerItem = Pick<
-  FabricObject,
+  ElementObject,
   'id' | 'zIndex' | 'type' | 'opacity'
 >;
 
@@ -38,9 +39,21 @@ Canvas.prototype.updateZIndices = function () {
   });
 };
 
-function LayersList({ canvas }: LayerListProps) {
-  const [layers, setLayers] = useState<LayerItem[]>([]);
-  const [selectedLayer, setSelectedLayer] = useState<LayerItem | null>(null);
+function Layers({}: LayerProps) {
+  const canvas = useCanvasStore((state) => state.canvas);
+
+  const { elements, removeElement, updateElement, setElements } =
+    useElementsStore(
+      useShallow((state) => ({
+        elements: state.elements,
+        removeElement: state.removeElement,
+        updateElement: state.updateElement,
+        setElements: state.setElements,
+      }))
+    );
+
+  const [selectedLayer, setSelectedLayer] =
+    useState<Partial<ElementObject> | null>(null);
 
   const hideSelectedLayer = () => {
     if (!selectedLayer || !canvas) return;
@@ -62,7 +75,7 @@ function LayersList({ canvas }: LayerListProps) {
     canvas.renderAll();
     updateLayers();
 
-    setSelectedLayer({ ...selectedLayer, opacity: object.opacity });
+    setSelectedLayer({ ...object });
   };
 
   const removeLayer = (layer: LayerItem) => {
@@ -125,15 +138,9 @@ function LayersList({ canvas }: LayerListProps) {
 
     const objects = canvas
       .getObjects()
-      .filter((obj) => !isGuidelineObject(obj))
-      .map((obj) => ({
-        id: obj.id,
-        zIndex: obj.zIndex,
-        type: obj.type,
-        opacity: obj.opacity,
-      }));
+      .filter((obj) => !isGuidelineObject(obj));
 
-    setLayers(() => [...objects].reverse());
+    setElements([...objects].reverse());
   };
 
   const handleObjectSelected = <
@@ -141,17 +148,13 @@ function LayersList({ canvas }: LayerListProps) {
   >(
     e: SelectionEvent
   ) => {
-    const selectedObject = e.selected?.[0] ?? null;
-    if (!selectedObject) {
+    const selectedCanvasObject = e.selected?.[0] ?? null;
+
+    if (!selectedCanvasObject) {
       setSelectedLayer(null);
       return;
     }
-    setSelectedLayer({
-      id: selectedObject.id,
-      zIndex: selectedObject.zIndex,
-      type: selectedObject.type,
-      opacity: selectedObject.opacity,
-    });
+    setSelectedLayer(selectedCanvasObject);
   };
 
   const selectLayerInCanvas = (id: LayerItem['id']) => {
@@ -162,12 +165,7 @@ function LayersList({ canvas }: LayerListProps) {
       setSelectedLayer(null);
       return;
     }
-    setSelectedLayer({
-      id: object.id,
-      zIndex: object.zIndex,
-      type: object.type,
-      opacity: object.opacity,
-    });
+    setSelectedLayer(object);
     canvas?.setActiveObject(object);
     canvas?.renderAll();
   };
@@ -221,7 +219,7 @@ function LayersList({ canvas }: LayerListProps) {
         </Button>
       </div>
       <ul>
-        {layers.map((layer) => (
+        {elements.map((layer) => (
           <li
             key={layer.id}
             className={`${
@@ -246,4 +244,4 @@ function LayersList({ canvas }: LayerListProps) {
   );
 }
 
-export default LayersList;
+export default Layers;
