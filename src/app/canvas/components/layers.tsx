@@ -7,10 +7,10 @@ import {
   ArrowUpIcon,
   ArrowDownIcon,
   EyeIcon,
-  EyeClosedIcon,
   TrashIcon,
   LockIcon,
   LockOpenIcon,
+  EyeOffIcon,
 } from 'lucide-react';
 import { isGuidelineObject } from '../utils/snap';
 import { useCanvasStore } from '../stores/canvas-store';
@@ -300,7 +300,7 @@ function LayerItem({
           className="[&_svg]:size-3 w-8 h-8"
           data-active={layer.visible !== true}
         >
-          {layer.visible ? <EyeIcon /> : <EyeClosedIcon />}
+          {layer.visible ? <EyeIcon /> : <EyeOffIcon />}
         </Button>
         <Button
           onClick={() => removeLayer(layer)}

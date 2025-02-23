@@ -9,19 +9,30 @@ export interface ElementObject extends FabricObject {}
 
 export interface ElementsState {
   elements: ElementObject[];
+  selectedId: ElementObject['id'] | null;
+  setSelectedId: (id: ElementObject['id'] | null) => void;
   addElement: (element: ElementObject) => void;
   updateElement: (
     id: ElementObject['id'],
-    updates: Partial<Omit<ElementObject, 'id'>>
+    updates: Partial<ElementObject>
   ) => void;
   removeElement: (id: ElementObject['id']) => void;
   setElements: (elements: ElementObject[]) => void;
+  getSelected: () => ElementObject | null;
 }
 
 export const useElementsStore = create<ElementsState>()(
   devtools(
-    (set) => ({
+    (set, get) => ({
       elements: [],
+      selectedId: null,
+      setSelectedId: (id) => set({ selectedId: id }),
+      getSelected: () => {
+        const state = get();
+        return (
+          state.elements.find((obj) => obj.id === state.selectedId) || null
+        );
+      },
 
       addElement: (element) =>
         set((state) => ({ elements: [...state.elements, element] })),
@@ -30,13 +41,14 @@ export const useElementsStore = create<ElementsState>()(
         set(
           produce((state: ElementsState) => {
             const el = state.elements.find((e) => e.id === id);
-            if (el) Object.assign(el, updates);
+            if (el) Object.assign({}, el, updates);
           })
         ),
 
       removeElement: (id) =>
         set((state) => ({
           elements: state.elements.filter((el) => el.id !== id),
+          selected: state.selectedId === id ? null : state.selectedId,
         })),
       setElements: (elements) => set({ elements }),
     }),
