@@ -14,7 +14,7 @@ export const handleObjectMoving = (canvas: Canvas, object: FabricObject) => {
   const centerX = left + (object.width * object.scaleX) / 2;
   const centerY = top + (object.height * object.scaleY) / 2;
 
-  let newGuidelines = [];
+  const newGuidelines = [];
   clearGuidelines(canvas);
 
   let snapped = false;

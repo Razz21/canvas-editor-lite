@@ -86,7 +86,7 @@ function Layers({}: LayerProps) {
     setSelectedLayer({ ...object });
   };
 
-  const renameLayer = (element: ElementObject, name: string) => {
+  const _renameLayer = (element: ElementObject, name: string) => {
     if (!element || !canvas) return;
 
     const object = canvas.getObjects().find((obj) => obj.id === element.id);

@@ -25,7 +25,6 @@ const initProperties = {
 function LayerSettings({}: LayerSettingsProps) {
   const canvas = useCanvasStore((state) => state.canvas);
   const selectedObject = useElementsStore((state) => state.getSelected());
-  const updateElement = useElementsStore((state) => state.updateElement);
 
   const { setSelectedId } = useElementsStore(
     useShallow((state) => ({

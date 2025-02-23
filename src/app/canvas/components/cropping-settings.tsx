@@ -18,7 +18,6 @@ export type CroppingSettingsProps = {};
 
 function CroppingSettings({}: CroppingSettingsProps) {
   const canvas = useCanvasStore((state) => state.canvas);
-  const elements = useElementsStore((state) => state.elements);
   const selectedId = useElementsStore((state) => state.selectedId);
 
   const [frames, setFrames] = useState<FabricObject[]>([]);
@@ -94,15 +93,12 @@ function CroppingSettings({}: CroppingSettingsProps) {
 
   return (
     <div className="bg-background p-4 rounded shadow-md space-y-4">
-      <Select
-        value={selectedFrame?.id || ''}
-        onValueChange={handleFrameSelect}
-      >
+      <Select value={selectedFrame?.id || ''} onValueChange={handleFrameSelect}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Select a frame" />
         </SelectTrigger>
         <SelectContent>
-          {frames.map((frame, idx) => (
+          {frames.map((frame) => (
             <SelectItem value={frame.id!} key={frame.id}>
               {frame.name}
             </SelectItem>

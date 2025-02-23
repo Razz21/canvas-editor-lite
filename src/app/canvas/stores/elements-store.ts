@@ -1,22 +1,19 @@
-import { create } from 'zustand';
-import { produce } from 'immer';
-import { FabricObject } from 'fabric';
-import { devtools } from 'zustand/middleware';
+import { create } from "zustand";
+import { produce } from "immer";
+import { FabricObject } from "fabric";
+import { devtools } from "zustand/middleware";
 
-export type ElementType = 'Rect' | 'Circle' | 'Textbox';
+export type ElementType = "Rect" | "Circle" | "Textbox";
 
 export interface ElementObject extends FabricObject {}
 
 export interface ElementsState {
   elements: ElementObject[];
-  selectedId: ElementObject['id'] | null;
-  setSelectedId: (id: ElementObject['id'] | null) => void;
+  selectedId: ElementObject["id"] | null;
+  setSelectedId: (id: ElementObject["id"] | null) => void;
   addElement: (element: ElementObject) => void;
-  updateElement: (
-    id: ElementObject['id'],
-    updates: Partial<ElementObject>
-  ) => void;
-  removeElement: (id: ElementObject['id']) => void;
+  updateElement: (id: ElementObject["id"], updates: Partial<ElementObject>) => void;
+  removeElement: (id: ElementObject["id"]) => void;
   setElements: (elements: ElementObject[]) => void;
   getSelected: () => ElementObject | null;
 }
@@ -29,13 +26,10 @@ export const useElementsStore = create<ElementsState>()(
       setSelectedId: (id) => set({ selectedId: id }),
       getSelected: () => {
         const state = get();
-        return (
-          state.elements.find((obj) => obj.id === state.selectedId) || null
-        );
+        return state.elements.find((obj) => obj.id === state.selectedId) || null;
       },
 
-      addElement: (element) =>
-        set((state) => ({ elements: [...state.elements, element] })),
+      addElement: (element) => set((state) => ({ elements: [...state.elements, element] })),
 
       updateElement: (id, updates) =>
         set(
@@ -52,6 +46,6 @@ export const useElementsStore = create<ElementsState>()(
         })),
       setElements: (elements) => set({ elements }),
     }),
-    { name: 'ElementsStore' }
+    { name: "ElementsStore" }
   )
 );
