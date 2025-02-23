@@ -4,6 +4,7 @@ declare module 'fabric' {
     id?: string;
     zIndex?: number;
     prevOpacity?: number;
+    locked?: boolean;
   }
 
   interface Canvas {

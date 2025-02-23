@@ -2,25 +2,24 @@
 
 import { Button } from '@/components/ui/button';
 import { Canvas, FabricObject } from 'fabric';
-import { useEffect, useState } from 'react';
+import { ComponentProps, useEffect, useState } from 'react';
 import {
   ArrowUpIcon,
   ArrowDownIcon,
   EyeIcon,
   EyeClosedIcon,
   TrashIcon,
+  LockIcon,
+  LockOpenIcon,
 } from 'lucide-react';
 import { isGuidelineObject } from '../utils/snap';
 import { useCanvasStore } from '../stores/canvas-store';
 import { ElementObject, useElementsStore } from '../stores/elements-store';
 import { useShallow } from 'zustand/react/shallow';
+import { Separator } from '@/components/ui/separator';
+import { clamp } from '../utils/numbers';
 
 export type LayerProps = {};
-
-export type LayerItem = Pick<
-  ElementObject,
-  'id' | 'zIndex' | 'type' | 'opacity'
->;
 
 // TODO: extract this to a separate file
 const addIdToObject = (object: FabricObject) => {
@@ -42,35 +41,30 @@ Canvas.prototype.updateZIndices = function () {
 function Layers({}: LayerProps) {
   const canvas = useCanvasStore((state) => state.canvas);
 
-  const { elements, removeElement, updateElement, setElements } =
-    useElementsStore(
-      useShallow((state) => ({
-        elements: state.elements,
-        removeElement: state.removeElement,
-        updateElement: state.updateElement,
-        setElements: state.setElements,
-      }))
-    );
+  const { elements, setElements } = useElementsStore(
+    useShallow((state) => ({
+      elements: state.elements,
+      setElements: state.setElements,
+    }))
+  );
 
   const [selectedLayer, setSelectedLayer] =
     useState<Partial<ElementObject> | null>(null);
 
-  const hideSelectedLayer = () => {
-    if (!selectedLayer || !canvas) return;
+  const lockLayer = (element: ElementObject) => {
+    if (!element || !canvas) return;
 
-    const object = canvas
-      .getObjects()
-      .find((obj) => obj.id === selectedLayer.id);
+    const object = canvas.getObjects().find((obj) => obj.id === element.id);
 
     if (!object) return;
 
-    if (object.opacity === 0) {
-      object.opacity = object.prevOpacity ?? 1;
-      object.prevOpacity = undefined;
-    } else {
-      object.prevOpacity = object.opacity || 1;
-      object.opacity = 0;
-    }
+    object.locked = !object.locked;
+
+    object.lockMovementX = object.locked;
+    object.lockMovementY = object.locked;
+    object.lockRotation = object.locked;
+    object.lockScalingX = object.locked;
+    object.lockScalingY = object.locked;
 
     canvas.renderAll();
     updateLayers();
@@ -78,10 +72,39 @@ function Layers({}: LayerProps) {
     setSelectedLayer({ ...object });
   };
 
-  const removeLayer = (layer: LayerItem) => {
+  const hideLayer = (element: ElementObject) => {
+    if (!element || !canvas) return;
+
+    const object = canvas.getObjects().find((obj) => obj.id === element.id);
+
+    if (!object) return;
+    object.visible = !object.visible;
+
+    canvas.renderAll();
+    updateLayers();
+
+    setSelectedLayer({ ...object });
+  };
+
+  const renameLayer = (element: ElementObject, name: string) => {
+    if (!element || !canvas) return;
+
+    const object = canvas.getObjects().find((obj) => obj.id === element.id);
+
+    if (!object) return;
+
+    object.name = name;
+
+    canvas.renderAll();
+    updateLayers();
+
+    setSelectedLayer({ ...object });
+  };
+
+  const removeLayer = (element: ElementObject) => {
     if (!canvas) return;
 
-    const object = canvas.getObjects().find((obj) => obj.id === layer.id);
+    const object = canvas.getObjects().find((obj) => obj.id === element.id);
 
     if (!object) return;
 
@@ -91,25 +114,26 @@ function Layers({}: LayerProps) {
     updateLayers();
   };
 
-  const moveSelectedLayer = (direction: 'up' | 'down') => {
-    if (!selectedLayer || !canvas) return;
+  const moveLayer = (
+    layer: Partial<ElementObject> | null,
+    direction: number
+  ) => {
+    if (!canvas || !layer) return;
 
     const objects = canvas?.getObjects();
+    if (!objects) return;
 
-    const object = objects?.find((obj) => obj.id === selectedLayer.id);
-
-    if (!(object && objects)) return;
+    const object = objects?.find((obj) => obj.id === layer.id);
+    if (!object) return;
 
     const currentIndex = objects.indexOf(object);
-    if (direction === 'up' && currentIndex < objects.length - 1) {
-      const temp = objects[currentIndex];
-      objects[currentIndex] = objects[currentIndex + 1];
-      objects[currentIndex + 1] = temp;
-    } else if (direction === 'down' && currentIndex > 0) {
-      const temp = objects[currentIndex];
-      objects[currentIndex] = objects[currentIndex - 1];
-      objects[currentIndex - 1] = temp;
-    }
+    const newIndex = clamp(currentIndex + direction, 0, objects.length - 1);
+
+    if (currentIndex === newIndex) return;
+
+    const temp = objects[currentIndex];
+    objects[currentIndex] = objects[newIndex];
+    objects[newIndex] = temp;
 
     const bgColor = canvas.backgroundColor;
     canvas.clear();
@@ -117,8 +141,6 @@ function Layers({}: LayerProps) {
     objects.forEach((obj) => canvas.add(obj));
 
     canvas.backgroundColor = bgColor;
-
-    canvas.renderAll();
 
     objects.forEach((obj, index) => {
       obj.zIndex = index;
@@ -157,11 +179,10 @@ function Layers({}: LayerProps) {
     setSelectedLayer(selectedCanvasObject);
   };
 
-  const selectLayerInCanvas = (id: LayerItem['id']) => {
+  const selectLayerInCanvas = (id: ElementObject['id']) => {
     const object = canvas?.getObjects().find((obj) => obj.id === id);
 
     if (!object) {
-      // debugger;
       setSelectedLayer(null);
       return;
     }
@@ -172,6 +193,7 @@ function Layers({}: LayerProps) {
 
   useEffect(() => {
     if (canvas) {
+      // TODO avoid re-rendering when snap guidelines are triggered
       canvas.on('object:added', updateLayers);
       canvas.on('object:removed', updateLayers);
       canvas.on('object:modified', updateLayers);
@@ -195,49 +217,39 @@ function Layers({}: LayerProps) {
 
   return (
     <div className="bg-background p-4 rounded shadow-md space-y-4">
-      <div className="flex gap-4">
-        <Button
-          onClick={() => moveSelectedLayer('up')}
-          size="icon"
-          disabled={!selectedLayer}
-        >
-          <ArrowUpIcon />
-        </Button>
-        <Button
-          onClick={() => moveSelectedLayer('down')}
-          size="icon"
-          disabled={!selectedLayer}
-        >
-          <ArrowDownIcon />
-        </Button>
-        <Button
-          onClick={hideSelectedLayer}
-          size="icon"
-          disabled={!selectedLayer}
-        >
-          {selectedLayer?.opacity === 0 ? <EyeClosedIcon /> : <EyeIcon />}
-        </Button>
+      <div className="flex justify-between items-center">
+        <span>Layers</span>
+        <span className="flex gap-1">
+          <Button
+            onClick={() => moveLayer(selectedLayer, 1)}
+            size="icon"
+            disabled={!selectedLayer}
+            className="[&_svg]:size-3 w-8 h-8"
+          >
+            <ArrowUpIcon />
+          </Button>
+          <Button
+            onClick={() => moveLayer(selectedLayer, -1)}
+            size="icon"
+            disabled={!selectedLayer}
+            className="[&_svg]:size-3 w-8 h-8"
+          >
+            <ArrowDownIcon />
+          </Button>
+        </span>
       </div>
+      <Separator className="my-4" />
       <ul>
         {elements.map((layer) => (
-          <li
+          <LayerItem
             key={layer.id}
-            className={`${
-              layer.id === selectedLayer?.id ? 'bg-gray-200/50' : ''
-            } p-2 rounded flex justify-between items-center`}
+            hideLayer={hideLayer}
+            lockLayer={lockLayer}
+            removeLayer={removeLayer}
+            layer={layer}
+            selected={layer.id === selectedLayer?.id}
             onClick={() => selectLayerInCanvas(layer.id)}
-          >
-            <span>
-              {layer.type} ({layer.zIndex})
-            </span>
-            <Button
-              onClick={() => removeLayer(layer)}
-              size="icon"
-              variant="secondary"
-            >
-              <TrashIcon />
-            </Button>
-          </li>
+          />
         ))}
       </ul>
     </div>
@@ -245,3 +257,61 @@ function Layers({}: LayerProps) {
 }
 
 export default Layers;
+
+type LayerItemProps = {
+  layer: ElementObject;
+  selected: boolean;
+  lockLayer: (element: ElementObject) => void;
+  hideLayer: (element: ElementObject) => void;
+  removeLayer: (element: ElementObject) => void;
+} & ComponentProps<'li'>;
+
+function LayerItem({
+  selected,
+  className,
+  hideLayer,
+  layer,
+  lockLayer,
+  removeLayer,
+  ...rest
+}: LayerItemProps) {
+  return (
+    <li
+      className={`${
+        selected ? 'bg-neutral-100/50' : ''
+      } p-2 rounded flex justify-between items-center ${className || ''}`}
+      {...rest}
+    >
+      <span>{layer.name}</span>
+      <div className="flex gap-1">
+        <Button
+          onClick={() => lockLayer(layer)}
+          size="icon"
+          variant="ghost"
+          className="[&_svg]:size-3 w-8 h-8"
+          data-active={layer.locked === true}
+        >
+          {layer.locked === true ? <LockIcon /> : <LockOpenIcon />}
+        </Button>
+        <Button
+          onClick={() => hideLayer(layer)}
+          size="icon"
+          variant="ghost"
+          className="[&_svg]:size-3 w-8 h-8"
+          data-active={layer.visible !== true}
+        >
+          {layer.visible ? <EyeIcon /> : <EyeClosedIcon />}
+        </Button>
+        <Button
+          onClick={() => removeLayer(layer)}
+          size="icon"
+          variant="secondary"
+          className="[&_svg]:size-3 w-8 h-8"
+          data-active
+        >
+          <TrashIcon />
+        </Button>
+      </div>
+    </li>
+  );
+}
