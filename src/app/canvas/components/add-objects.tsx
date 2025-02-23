@@ -65,7 +65,17 @@ const maintainStrokeWidth = (object: FabricObject) => {
 const addFrameToCanvas = (canvas: Canvas | null) => {
   if (!canvas) return;
 
-  const frameName = `Frame ${canvas.getObjects('rect').length + 1}`;
+  const nextIndex =
+    Math.max(
+      0,
+      ...canvas
+        .getObjects('rect')
+        .filter((obj) => obj.id?.startsWith('frame_'))
+        .map(({ id }) => parseInt(id?.split('_')[1] ?? '0'))
+    ) + 1;
+
+  const frameName = `Frame ${nextIndex}`;
+
   const frame = new Rect({
     left: 100,
     top: 100,
@@ -78,6 +88,8 @@ const addFrameToCanvas = (canvas: Canvas | null) => {
     evented: true,
     name: frameName,
   });
+  frame.id = `frame_${nextIndex}`;
+
   canvas.add(frame);
   canvas.setActiveObject(frame);
   canvas.renderAll();

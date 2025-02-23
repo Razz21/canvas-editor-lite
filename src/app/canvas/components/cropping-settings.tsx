@@ -8,39 +8,42 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Canvas, FabricObject } from 'fabric';
+import { FabricObject } from 'fabric';
 import { DownloadIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useCanvasStore } from '../stores/canvas-store';
+import { useElementsStore } from '../stores/elements-store';
 
-export type CroppingSettingsProps = {
-  canvas: Canvas | null;
-  refreshKey: string | number;
-};
+export type CroppingSettingsProps = {};
 
-function CroppingSettings({ canvas, refreshKey }: CroppingSettingsProps) {
+function CroppingSettings({}: CroppingSettingsProps) {
+  const canvas = useCanvasStore((state) => state.canvas);
+  const elements = useElementsStore((state) => state.elements);
+  const selectedId = useElementsStore((state) => state.selectedId);
+
   const [frames, setFrames] = useState<FabricObject[]>([]);
   const [selectedFrame, setSelectedFrame] = useState<FabricObject | null>(null);
 
   const updateFrames = () => {
     if (!canvas) return;
 
-    const framesFromCanvas = canvas.getObjects('rect').filter((object) => {
-      return object.name?.startsWith('Frame');
-    });
+    const framesFromCanvas = canvas
+      .getObjects('rect')
+      .filter((object) => object.name?.startsWith('Frame '));
 
+    console.log('framesFromCanvas', framesFromCanvas);
     setFrames(framesFromCanvas);
 
-    if (framesFromCanvas.length) {
-      setSelectedFrame(framesFromCanvas[0]);
-    }
+    setSelectedFrame(framesFromCanvas[0] ?? null);
   };
 
   useEffect(() => {
     updateFrames();
-  }, [canvas, refreshKey]);
+  }, [canvas, selectedId]);
 
-  const handleFrameSelect = (frameName: string) => {
-    const selected = frames.find((f) => f.name === frameName);
+  const handleFrameSelect = (frameId: string) => {
+    const selected = frames.find((f) => f.id === frameId);
+    console.log('handleFrameSelect', { frameId, selected });
 
     if (!selected) return;
 
@@ -92,7 +95,7 @@ function CroppingSettings({ canvas, refreshKey }: CroppingSettingsProps) {
   return (
     <div className="bg-background p-4 rounded shadow-md space-y-4">
       <Select
-        value={selectedFrame?.name || ''}
+        value={selectedFrame?.id || ''}
         onValueChange={handleFrameSelect}
       >
         <SelectTrigger className="w-[180px]">
@@ -100,13 +103,13 @@ function CroppingSettings({ canvas, refreshKey }: CroppingSettingsProps) {
         </SelectTrigger>
         <SelectContent>
           {frames.map((frame, idx) => (
-            <SelectItem value={frame.name ?? idx.toString()} key={frame.name}>
+            <SelectItem value={frame.id!} key={frame.id}>
               {frame.name}
             </SelectItem>
           ))}
         </SelectContent>
       </Select>
-      <Button onClick={exportFrameAsPNG} className='w-full'>
+      <Button onClick={exportFrameAsPNG} className="w-full">
         <DownloadIcon /> Export as PNG
       </Button>
     </div>

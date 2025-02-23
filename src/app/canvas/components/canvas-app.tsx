@@ -6,6 +6,7 @@ import CanvasSettings from './canvas-settings';
 import FloatingPanel from './floating-panel';
 import Layers from './layers';
 import LayerSettings from './layer-settings';
+import CroppingSettings from './cropping-settings';
 
 export type CanvasAppProps = {};
 
@@ -19,7 +20,7 @@ function CanvasApp({}: CanvasAppProps) {
         <div className="fixed top-1/2 -translate-y-1/2 right-4 flex flex-col gap-4">
           <LayerSettings />
           <CanvasSettings />
-          {/* <CroppingSettings canvas={canvas} refreshKey={refreshKey} /> */}
+          <CroppingSettings  />
           <Layers />
         </div>
       </div>
