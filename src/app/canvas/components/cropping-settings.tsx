@@ -30,7 +30,6 @@ function CroppingSettings({}: CroppingSettingsProps) {
       .getObjects("rect")
       .filter((object) => object.name?.startsWith("Frame "));
 
-    console.log("framesFromCanvas", framesFromCanvas);
     setFrames(framesFromCanvas);
 
     setSelectedFrame(framesFromCanvas[0] ?? null);

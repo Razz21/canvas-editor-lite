@@ -1,9 +1,30 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Rect, Textbox, Circle, Canvas, FabricObject } from "fabric";
-import { CircleIcon, CropIcon, SquareIcon, TypeIcon } from "lucide-react";
+import {
+  Rect,
+  Textbox,
+  Circle,
+  Canvas,
+  FabricObject,
+  TPointerEventInfo,
+  TPointerEvent,
+  Line,
+  PencilBrush,
+} from "fabric";
+import {
+  CircleIcon,
+  CropIcon,
+  PencilIcon,
+  SlashIcon,
+  SplineIcon,
+  SquareIcon,
+  TypeIcon,
+} from "lucide-react";
 import { useCanvasStore } from "../stores/canvas-store";
+import { useEffect, useState } from "react";
+import { Separator } from "@/components/ui/separator";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 function addRectangle(canvas: Canvas | null) {
   if (!canvas) return;
@@ -105,23 +126,292 @@ const addFrameToCanvas = (canvas: Canvas | null) => {
   });
 };
 
+const SHAPES = {
+  CIRCLE: "CIRCLE",
+  RECTANGLE: "RECTANGLE",
+  LINE: "LINE",
+  PATH: "PATH",
+  PENCIL: "PENCIL",
+} as const;
+
+type ShapeType = keyof typeof SHAPES;
+
 const NavTools = () => {
   const canvas = useCanvasStore((state) => state.canvas);
 
+  const [isDrawing, setIsDrawing] = useState<boolean>(false);
+  const [shape, setShape] = useState<FabricObject | null>(null);
+  const [shapeType, setShapeType] = useState<ShapeType | string>("");
+  const [originX, setOriginX] = useState<number>(0);
+  const [originY, setOriginY] = useState<number>(0);
+
+  const handleMouseDownCircle = (event: TPointerEventInfo<TPointerEvent>) => {
+    const pointer = canvas?.getViewportPoint(event.e);
+    if (!canvas || !pointer) return;
+
+    const newCircle = new Circle({
+      left: pointer.x,
+      top: pointer.y,
+      // originX: "left",
+      // originY: "top",
+      fill: "transparent",
+      radius: 0,
+      stroke: "black",
+      strokeWidth: 2,
+      selectable: true,
+      hasControls: true,
+    });
+    setOriginX(pointer.x);
+    setOriginY(pointer.y);
+    canvas.add(newCircle);
+    setShape(newCircle);
+    setIsDrawing(true);
+  };
+
+  const handleMouseMoveCircle = (event: TPointerEventInfo<TPointerEvent>) => {
+    if (isDrawing && shape && canvas) {
+      const pointer = canvas.getViewportPoint(event.e);
+      const radius = Math.hypot(pointer.x - originX, pointer.y - originY);
+      shape.set({ radius });
+      canvas.renderAll();
+    }
+  };
+
+  const handleMouseUpCircle = (
+    event: TPointerEventInfo<TPointerEvent> & { currentTarget?: FabricObject }
+  ) => {
+    setIsDrawing(false);
+    setShape(null);
+    setShapeType("");
+    if (canvas) {
+      canvas.defaultCursor = "default";
+      if (event.currentTarget) {
+        canvas.setActiveObject(event.currentTarget);
+      }
+    }
+  };
+
+  const handleMouseDownRect = (event: TPointerEventInfo<TPointerEvent>) => {
+    const pointer = canvas?.getViewportPoint(event.e);
+
+    if (!canvas || !pointer) return;
+
+    const newObject = new Rect({
+      left: pointer.x,
+      top: pointer.y,
+      originX: "left",
+      originY: "top",
+      width: 0,
+      height: 0,
+      fill: "transparent",
+      stroke: "black",
+      strokeWidth: 2,
+      selectable: true,
+      hasControls: true,
+    });
+
+    setOriginX(pointer.x);
+    setOriginY(pointer.y);
+    canvas.add(newObject);
+    setShape(newObject);
+    setIsDrawing(true);
+  };
+
+  const handleMouseMoveRect = (event: TPointerEventInfo<TPointerEvent>) => {
+    if (isDrawing && shape && canvas) {
+      const pointer = canvas.getViewportPoint(event.e);
+      shape.set({
+        width: Math.abs(originX - pointer.x),
+        height: Math.abs(originY - pointer.y),
+      });
+      if (originX > pointer.x) {
+        shape.set({ left: pointer.x });
+      }
+      if (originY > pointer.y) {
+        shape.set({ top: pointer.y });
+      }
+      canvas.renderAll();
+    }
+  };
+
+  const handleMouseDownLine = (event: TPointerEventInfo<TPointerEvent>) => {
+    const pointer = canvas?.getViewportPoint(event.e);
+
+    if (!canvas || !pointer) return;
+
+    const newLine = new Line([pointer.x, pointer.y, pointer.x, pointer.y], {
+      stroke: "black",
+      strokeWidth: 2,
+      selectable: true,
+      hasControls: true,
+    });
+    canvas.add(newLine);
+    setShape(newLine);
+    setIsDrawing(true);
+  };
+
+  const handleMouseMoveLine = (event: TPointerEventInfo<TPointerEvent>) => {
+    if (isDrawing && shape && canvas) {
+      const pointer = canvas.getViewportPoint(event.e);
+
+      shape.set({ x2: pointer.x, y2: pointer.y });
+      canvas.renderAll();
+    }
+  };
+
+  const handleMouseDownPencil = (event: TPointerEventInfo<TPointerEvent>) => {
+    setIsDrawing(true);
+  };
+
+  const handleMouseMovePencil = (event: TPointerEventInfo<TPointerEvent>) => {};
+
+  const handleMouseUpPencil = (
+    event: TPointerEventInfo<TPointerEvent> & { currentTarget?: FabricObject }
+  ) => {
+    setIsDrawing(false);
+    setShape(null);
+    setShapeType("");
+    if (canvas) {
+      canvas.defaultCursor = "default";
+      if (event.currentTarget) {
+        canvas.setActiveObject(event.currentTarget);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (!canvas) return;
+
+    const handleMouseDown = (event: TPointerEventInfo<TPointerEvent>) => {
+      switch (shapeType) {
+        case SHAPES.CIRCLE:
+          handleMouseDownCircle(event);
+          break;
+        case SHAPES.RECTANGLE:
+          handleMouseDownRect(event);
+          break;
+        case SHAPES.LINE:
+          handleMouseDownLine(event);
+          break;
+        case SHAPES.PENCIL:
+          handleMouseDownPencil(event);
+          break;
+        // case SHAPES.PATH:
+        //   handleMouseDownPath(event);
+        //   break;
+        default:
+          break;
+      }
+    };
+
+    const handleMouseMove = (event: TPointerEventInfo<TPointerEvent>) => {
+      switch (shapeType) {
+        case SHAPES.CIRCLE:
+          handleMouseMoveCircle(event);
+          break;
+        case SHAPES.RECTANGLE:
+          handleMouseMoveRect(event);
+          break;
+        case SHAPES.LINE:
+          handleMouseMoveLine(event);
+          break;
+        case SHAPES.PENCIL:
+          handleMouseMovePencil(event);
+          break;
+        // case SHAPES.PATH:
+        //   handleMouseMovePath(event);
+        //   break;
+        default:
+          break;
+      }
+    };
+
+    const handleMouseUp = (event: TPointerEventInfo<TPointerEvent>) => {
+      switch (shapeType) {
+        case SHAPES.CIRCLE:
+        case SHAPES.RECTANGLE:
+        case SHAPES.LINE:
+          handleMouseUpCircle(event);
+          break;
+        case SHAPES.PENCIL:
+          handleMouseUpPencil(event);
+          break;
+        default:
+          break;
+      }
+    };
+    if (shapeType === SHAPES.PENCIL) {
+      canvas.isDrawingMode = true;
+    } else {
+      canvas.isDrawingMode = false;
+    }
+
+    canvas?.on("mouse:down", handleMouseDown);
+    canvas?.on("mouse:move", handleMouseMove);
+    canvas?.on("mouse:up", handleMouseUp);
+
+    return () => {
+      if (canvas) {
+        canvas.off("mouse:down", handleMouseDown);
+        canvas.off("mouse:move", handleMouseMove);
+        canvas.off("mouse:up", handleMouseUp);
+      }
+    };
+  }, [canvas, shapeType, isDrawing, shape, originX, originY]);
+
+  function setCurrentShapeType(value: ShapeType) {
+    if (canvas) {
+      if (value === SHAPES.PENCIL) {
+        canvas.isDrawingMode = true;
+        if (!(canvas.freeDrawingBrush instanceof PencilBrush)) {
+          const pencil = new PencilBrush(canvas);
+          pencil.color = "#000000";
+          pencil.width = 5;
+          canvas.freeDrawingBrush = pencil;
+        }
+      } else {
+        canvas.isDrawingMode = false;
+      }
+    }
+    setShapeType(value);
+  }
+
   return (
-    <div className="flex gap-1 p-2">
-      <Button onClick={() => addFrameToCanvas(canvas)} variant="ghost" size="icon">
-        <CropIcon />
-      </Button>
-      <Button onClick={() => addRectangle(canvas)} variant="ghost" size="icon">
-        <SquareIcon />
-      </Button>
-      <Button onClick={() => addCircle(canvas)} variant="ghost" size="icon">
-        <CircleIcon />
-      </Button>
-      <Button onClick={() => addTextBox(canvas)} variant="ghost" size="icon">
-        <TypeIcon />
-      </Button>
+    <div className="flex p-2 gap-1">
+      <div className="flex gap-1">
+        <Button onClick={() => addFrameToCanvas(canvas)} variant="ghost" size="icon">
+          <CropIcon />
+        </Button>
+        <Button onClick={() => addRectangle(canvas)} variant="ghost" size="icon">
+          <SquareIcon />
+        </Button>
+        <Button onClick={() => addCircle(canvas)} variant="ghost" size="icon">
+          <CircleIcon />
+        </Button>
+        <Button onClick={() => addTextBox(canvas)} variant="ghost" size="icon">
+          <TypeIcon />
+        </Button>
+      </div>
+
+      <Separator orientation="vertical" className="h-auto" />
+
+      <ToggleGroup type="single" value={shapeType} onValueChange={setCurrentShapeType}>
+        <ToggleGroupItem value={SHAPES.CIRCLE} aria-label="circle">
+          <CircleIcon />
+        </ToggleGroupItem>
+        <ToggleGroupItem value={SHAPES.RECTANGLE} aria-label="rectangle">
+          <SquareIcon />
+        </ToggleGroupItem>
+        <ToggleGroupItem value={SHAPES.LINE} aria-label="line">
+          <SlashIcon />
+        </ToggleGroupItem>
+        <ToggleGroupItem value={SHAPES.PATH} aria-label="path">
+          <SplineIcon />
+        </ToggleGroupItem>
+        <ToggleGroupItem value={SHAPES.PENCIL} aria-label="pencil">
+          <PencilIcon />
+        </ToggleGroupItem>
+      </ToggleGroup>
     </div>
   );
 };
