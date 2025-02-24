@@ -109,7 +109,7 @@ const AddObjects = () => {
   const canvas = useCanvasStore((state) => state.canvas);
 
   return (
-    <div className="flex flex-col gap-1 p-2">
+    <div className="flex gap-1 p-2">
       <Button
         onClick={() => addFrameToCanvas(canvas)}
         variant="ghost"

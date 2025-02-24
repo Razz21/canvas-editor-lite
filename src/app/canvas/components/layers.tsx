@@ -1,8 +1,8 @@
-'use client;';
+"use client;";
 
-import { Button } from '@/components/ui/button';
-import { Canvas, FabricObject } from 'fabric';
-import { ComponentProps, useEffect, useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { FabricObject } from "fabric";
+import { ComponentProps, useCallback, useEffect, useState } from "react";
 import {
   ArrowUpIcon,
   ArrowDownIcon,
@@ -11,32 +11,16 @@ import {
   LockIcon,
   LockOpenIcon,
   EyeOffIcon,
-} from 'lucide-react';
-import { isGuidelineObject } from '../utils/snap';
-import { useCanvasStore } from '../stores/canvas-store';
-import { ElementObject, useElementsStore } from '../stores/elements-store';
-import { useShallow } from 'zustand/react/shallow';
-import { Separator } from '@/components/ui/separator';
-import { clamp } from '../utils/numbers';
+} from "lucide-react";
+import { isGuidelineObject } from "../utils/snap";
+import { useCanvasStore } from "../stores/canvas-store";
+import { ElementObject, useElementsStore } from "../stores/elements-store";
+import { useShallow } from "zustand/react/shallow";
+import { Separator } from "@/components/ui/separator";
+import { clamp } from "../utils/numbers";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export type LayerProps = {};
-
-// TODO: extract this to a separate file
-const addIdToObject = (object: FabricObject) => {
-  if (!object.id) {
-    const timestapm = new Date().getTime().toString();
-    object.id = `${object.type}_${timestapm}`;
-  }
-};
-
-// TODO: extract this to a separate file
-Canvas.prototype.updateZIndices = function () {
-  const objects = this.getObjects();
-  objects.forEach((object, index) => {
-    addIdToObject(object);
-    object.zIndex = index;
-  });
-};
 
 function Layers({}: LayerProps) {
   const canvas = useCanvasStore((state) => state.canvas);
@@ -48,180 +32,163 @@ function Layers({}: LayerProps) {
     }))
   );
 
-  const [selectedLayer, setSelectedLayer] =
-    useState<Partial<ElementObject> | null>(null);
+  const [selectedLayer, setSelectedLayer] = useState<Partial<ElementObject> | null>(null);
 
-  const lockLayer = (element: ElementObject) => {
-    if (!element || !canvas) return;
+  const lockLayer = useCallback(
+    (element: ElementObject) => {
+      if (!element || !canvas) return;
 
-    const object = canvas.getObjects().find((obj) => obj.id === element.id);
+      const object = canvas.getObjectById(element.id);
 
-    if (!object) return;
+      if (!object) return;
+      const newLocked = !object.locked;
 
-    object.locked = !object.locked;
+      object.set({
+        locked: newLocked,
+        lockMovementX: newLocked,
+        lockMovementY: newLocked,
+        lockRotation: newLocked,
+        lockScalingX: newLocked,
+        lockScalingY: newLocked,
+      });
+      // TODO consider another way to update layers without re-rendering by updateLayers()
+      canvas.fire("object:modified", { target: object });
+    },
+    [canvas]
+  );
 
-    object.lockMovementX = object.locked;
-    object.lockMovementY = object.locked;
-    object.lockRotation = object.locked;
-    object.lockScalingX = object.locked;
-    object.lockScalingY = object.locked;
+  const hideLayer = useCallback(
+    (element: ElementObject) => {
+      const object = canvas?.getObjectById(element.id);
 
-    canvas.renderAll();
-    updateLayers();
+      if (!object) return;
 
-    setSelectedLayer({ ...object });
-  };
+      object.set({
+        visible: !object.visible,
+      });
+      // <object:modified> event is not triggered when setting visible property
+      // trigger <object:modified> event manually to update layers
+      canvas?.fire("object:modified", { target: object });
+    },
+    [canvas]
+  );
 
-  const hideLayer = (element: ElementObject) => {
-    if (!element || !canvas) return;
+  const removeLayer = useCallback(
+    (element: ElementObject) => {
+      const object = canvas?.getObjectById(element.id);
 
-    const object = canvas.getObjects().find((obj) => obj.id === element.id);
+      if (!object) return;
 
-    if (!object) return;
-    object.visible = !object.visible;
+      canvas?.remove(object);
+      canvas?.renderAll();
+    },
+    [canvas]
+  );
 
-    canvas.renderAll();
-    updateLayers();
+  const moveLayer = useCallback(
+    (layerId: ElementObject["id"] | null, direction: number) => {
+      if (!canvas || !layerId) return;
 
-    setSelectedLayer({ ...object });
-  };
+      const objects = canvas?.getObjects();
 
-  const _renameLayer = (element: ElementObject, name: string) => {
-    if (!element || !canvas) return;
+      if (!objects) return;
 
-    const object = canvas.getObjects().find((obj) => obj.id === element.id);
+      const object = canvas?.getObjectById(layerId);
+      if (!object) return;
 
-    if (!object) return;
+      const currentIndex = objects.indexOf(object);
+      const newIndex = clamp(currentIndex + direction, 0, objects.length - 1);
 
-    object.name = name;
+      if (currentIndex === newIndex) return;
 
-    canvas.renderAll();
-    updateLayers();
+      const temp = objects[currentIndex];
+      objects[currentIndex] = objects[newIndex];
+      objects[newIndex] = temp;
 
-    setSelectedLayer({ ...object });
-  };
+      // update canvas objects in bulk
+      canvas._objects = objects;
 
-  const removeLayer = (element: ElementObject) => {
+      // trigger re-render
+      // TODO consider another way to update layers withuout re-rendering by updateLayers()
+      canvas.fire("object:modified", { target: object });
+
+      canvas.setActiveObject(object);
+    },
+    [canvas]
+  );
+
+  const updateLayers = <UpdateEvent extends { target: FabricObject }>(event?: UpdateEvent) => {
+    if (event && isGuidelineObject(event.target)) return;
     if (!canvas) return;
 
-    const object = canvas.getObjects().find((obj) => obj.id === element.id);
+    const objects = canvas.getObjects();
+    const filteredObjects = objects.filter((obj) => !isGuidelineObject(obj));
 
-    if (!object) return;
-
-    canvas.remove(object);
-    canvas.renderAll();
-
-    updateLayers();
-  };
-
-  const moveLayer = (
-    layer: Partial<ElementObject> | null,
-    direction: number
-  ) => {
-    if (!canvas || !layer) return;
-
-    const objects = canvas?.getObjects();
-    if (!objects) return;
-
-    const object = objects?.find((obj) => obj.id === layer.id);
-    if (!object) return;
-
-    const currentIndex = objects.indexOf(object);
-    const newIndex = clamp(currentIndex + direction, 0, objects.length - 1);
-
-    if (currentIndex === newIndex) return;
-
-    const temp = objects[currentIndex];
-    objects[currentIndex] = objects[newIndex];
-    objects[newIndex] = temp;
-
-    const bgColor = canvas.backgroundColor;
-    canvas.clear();
-
-    objects.forEach((obj) => canvas.add(obj));
-
-    canvas.backgroundColor = bgColor;
-
-    objects.forEach((obj, index) => {
-      obj.zIndex = index;
+    filteredObjects.forEach((object, index) => {
+      object.zIndex = index;
     });
 
-    canvas.setActiveObject(object);
-
-    canvas.renderAll();
-
-    updateLayers();
+    setElements([...filteredObjects].reverse());
+    canvas.requestRenderAll();
   };
 
-  const updateLayers = () => {
-    if (!canvas) return;
-
-    canvas.updateZIndices();
-
-    const objects = canvas
-      .getObjects()
-      .filter((obj) => !isGuidelineObject(obj));
-
-    setElements([...objects].reverse());
+  const clearObjectSelected = () => {
+    setSelectedLayer(null);
   };
 
-  const handleObjectSelected = <
-    SelectionEvent extends { selected: FabricObject[] }
-  >(
+  const handleObjectSelected = <SelectionEvent extends { selected: FabricObject[] }>(
     e: SelectionEvent
   ) => {
-    const selectedCanvasObject = e.selected?.[0] ?? null;
-
-    if (!selectedCanvasObject) {
-      setSelectedLayer(null);
-      return;
-    }
-    setSelectedLayer(selectedCanvasObject);
+    setSelectedLayer(e.selected?.[0] ?? null);
   };
 
-  const selectLayerInCanvas = (id: ElementObject['id']) => {
-    const object = canvas?.getObjects().find((obj) => obj.id === id);
+  const selectLayerInCanvas = (id: ElementObject["id"]) => {
+    const object = canvas?.getObjectById(id) ?? null;
 
-    if (!object) {
-      setSelectedLayer(null);
-      return;
-    }
     setSelectedLayer(object);
-    canvas?.setActiveObject(object);
-    canvas?.renderAll();
+
+    if (object) {
+      canvas?.setActiveObject(object);
+    }
   };
 
   useEffect(() => {
     if (canvas) {
       // TODO avoid re-rendering when snap guidelines are triggered
-      canvas.on('object:added', updateLayers);
-      canvas.on('object:removed', updateLayers);
-      canvas.on('object:modified', updateLayers);
+      canvas.on("object:added", updateLayers);
+      canvas.on("object:removed", updateLayers);
+      canvas.on("object:modified", (e) => {
+        console.log("object:modified", e);
+        updateLayers(e);
+      });
 
-      canvas.on('selection:created', handleObjectSelected);
-      canvas.on('selection:updated', handleObjectSelected);
-      canvas.on('selection:cleared', () => setSelectedLayer(null));
+      // fired by canvas.setActiveObject(object)
+      // canvas.on("object:selected", updateLayers);
 
-      updateLayers();
+      canvas.on("selection:created", handleObjectSelected);
+      canvas.on("selection:updated", handleObjectSelected);
+      canvas.on("selection:cleared", clearObjectSelected);
+
+      // updateLayers();
     }
     return () => {
-      canvas?.off('object:added', updateLayers);
-      canvas?.off('object:removed', updateLayers);
-      canvas?.off('object:modified', updateLayers);
+      canvas?.off("object:added", updateLayers);
+      canvas?.off("object:removed", updateLayers);
+      canvas?.off("object:modified", updateLayers);
 
-      canvas?.off('selection:created', handleObjectSelected);
-      canvas?.off('selection:updated', handleObjectSelected);
-      canvas?.off('selection:cleared', () => setSelectedLayer(null));
+      canvas?.off("selection:created", handleObjectSelected);
+      canvas?.off("selection:updated", handleObjectSelected);
+      canvas?.off("selection:cleared", clearObjectSelected);
     };
   }, [canvas]);
 
   return (
-    <div className="bg-background p-4 rounded shadow-md space-y-4">
-      <div className="flex justify-between items-center">
+    <div className="bg-background rounded shadow-md space-y-2">
+      <div className="flex justify-between items-center p-2">
         <span>Layers</span>
         <span className="flex gap-1">
           <Button
-            onClick={() => moveLayer(selectedLayer, 1)}
+            onClick={() => moveLayer(selectedLayer?.id, 1)}
             size="icon"
             disabled={!selectedLayer}
             className="[&_svg]:size-3 w-8 h-8"
@@ -229,7 +196,7 @@ function Layers({}: LayerProps) {
             <ArrowUpIcon />
           </Button>
           <Button
-            onClick={() => moveLayer(selectedLayer, -1)}
+            onClick={() => moveLayer(selectedLayer?.id, -1)}
             size="icon"
             disabled={!selectedLayer}
             className="[&_svg]:size-3 w-8 h-8"
@@ -238,20 +205,24 @@ function Layers({}: LayerProps) {
           </Button>
         </span>
       </div>
-      <Separator className="my-4" />
-      <ul>
-        {elements.map((layer) => (
-          <LayerItem
-            key={layer.id}
-            hideLayer={hideLayer}
-            lockLayer={lockLayer}
-            removeLayer={removeLayer}
-            layer={layer}
-            selected={layer.id === selectedLayer?.id}
-            onClick={() => selectLayerInCanvas(layer.id)}
-          />
-        ))}
-      </ul>
+      <Separator />
+      <ScrollArea className="h-[40vh] p-2">
+        <ul className=" overflow-auto">
+          {elements.map((layer) => (
+            <LayerItem
+              key={layer.id}
+              hideLayer={hideLayer}
+              lockLayer={lockLayer}
+              removeLayer={removeLayer}
+              layer={layer}
+              selected={layer.id === selectedLayer?.id}
+              onClick={() => {
+                selectLayerInCanvas(layer.id);
+              }}
+            />
+          ))}
+        </ul>
+      </ScrollArea>
     </div>
   );
 }
@@ -264,7 +235,7 @@ type LayerItemProps = {
   lockLayer: (element: ElementObject) => void;
   hideLayer: (element: ElementObject) => void;
   removeLayer: (element: ElementObject) => void;
-} & ComponentProps<'li'>;
+} & ComponentProps<"li">;
 
 function LayerItem({
   selected,
@@ -278,8 +249,8 @@ function LayerItem({
   return (
     <li
       className={`${
-        selected ? 'bg-neutral-100/50' : ''
-      } p-2 rounded flex justify-between items-center ${className || ''}`}
+        selected ? "bg-neutral-500/10" : ""
+      } p-1 rounded flex justify-between items-center ${className || ""}`}
       {...rest}
     >
       <span>{layer.name}</span>

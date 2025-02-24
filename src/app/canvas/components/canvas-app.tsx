@@ -1,13 +1,13 @@
-'use client;';
+"use client;";
 
-import AddObjects from './add-objects';
-import CanvasBase from './canvas-base';
-import CanvasSettings from './canvas-settings';
-import FloatingPanel from './floating-panel';
-import Layers from './layers';
-import LayerSettings from './layer-settings';
-import CroppingSettings from './cropping-settings';
-import { ThemeToggle } from '@/app/components/theme-toggle';
+import AddObjects from "./add-objects";
+import CanvasBase from "./canvas-base";
+import CanvasSettings from "./canvas-settings";
+import FloatingPanel from "./floating-panel";
+import Layers from "./layers";
+import LayerSettings from "./layer-settings";
+import CroppingSettings from "./cropping-settings";
+import { ThemeToggle } from "@/app/components/theme-toggle";
 
 export type CanvasAppProps = {};
 
@@ -15,14 +15,16 @@ function CanvasApp({}: CanvasAppProps) {
   return (
     <div>
       <div className="z-20 relative">
-        <FloatingPanel className="fixed top-1/2 -translate-y-1/2 left-4">
+        <FloatingPanel className="fixed left-4 top-4">
           <AddObjects />
+        </FloatingPanel>
+        <FloatingPanel className="fixed left-4 top-1/2 -translate-y-1/2 w-72">
+          <Layers />
         </FloatingPanel>
         <div className="fixed top-1/2 -translate-y-1/2 right-4 flex flex-col gap-4">
           <LayerSettings />
           <CanvasSettings />
           <CroppingSettings />
-          <Layers />
         </div>
       </div>
       <CanvasBase />

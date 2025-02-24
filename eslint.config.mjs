@@ -25,6 +25,7 @@ const eslintConfig = [
           varsIgnorePattern: '^_',
         },
       ],
+      "react/display-name": "off",
     },
   },
 ];
