@@ -1,6 +1,6 @@
 "use client;";
 
-import AddObjects from "./add-objects";
+import NavTools from "./nav-tools";
 import CanvasBase from "./canvas-base";
 import CanvasSettings from "./canvas-settings";
 import FloatingPanel from "./floating-panel";
@@ -16,7 +16,7 @@ function CanvasApp({}: CanvasAppProps) {
     <div>
       <div className="z-20 relative">
         <FloatingPanel className="fixed left-4 top-4">
-          <AddObjects />
+          <NavTools />
         </FloatingPanel>
         <FloatingPanel className="fixed left-4 top-1/2 -translate-y-1/2 w-72">
           <Layers />

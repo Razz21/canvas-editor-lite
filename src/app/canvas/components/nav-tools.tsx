@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Rect, Textbox, Circle, Canvas, FabricObject } from 'fabric';
-import { CircleIcon, CropIcon, SquareIcon, TypeIcon } from 'lucide-react';
-import { useCanvasStore } from '../stores/canvas-store';
+import { Button } from "@/components/ui/button";
+import { Rect, Textbox, Circle, Canvas, FabricObject } from "fabric";
+import { CircleIcon, CropIcon, SquareIcon, TypeIcon } from "lucide-react";
+import { useCanvasStore } from "../stores/canvas-store";
 
 function addRectangle(canvas: Canvas | null) {
   if (!canvas) return;
@@ -11,7 +11,7 @@ function addRectangle(canvas: Canvas | null) {
   const item = new Rect({
     width: 100,
     height: 100,
-    fill: '#000000',
+    fill: "#000000",
     left: 10,
     top: 10,
   });
@@ -23,7 +23,7 @@ function addCircle(canvas: Canvas | null) {
 
   const item = new Circle({
     radius: 50,
-    fill: '#000000',
+    fill: "#000000",
     left: 10,
     top: 10,
   });
@@ -33,18 +33,18 @@ function addCircle(canvas: Canvas | null) {
 function addTextBox(canvas: Canvas | null) {
   if (!canvas) return;
 
-  const item = new Textbox('Edit Text', {
+  const item = new Textbox("Edit Text", {
     width: 100,
     fontSize: 20,
-    fill: '#000000',
+    fill: "#000000",
     left: 10,
     top: 10,
     lockScalingFlip: true,
     lockScalingX: false,
     lockScalingY: false,
     editable: true,
-    fontFamily: 'Arial',
-    textAlign: 'left',
+    fontFamily: "Arial",
+    textAlign: "left",
   });
   canvas.add(item);
   canvas.setActiveObject(item);
@@ -69,9 +69,9 @@ const addFrameToCanvas = (canvas: Canvas | null) => {
     Math.max(
       0,
       ...canvas
-        .getObjects('rect')
-        .filter((obj) => obj.id?.startsWith('frame_'))
-        .map(({ id }) => parseInt(id?.split('_')[1] ?? '0'))
+        .getObjects("rect")
+        .filter((obj) => obj.id?.startsWith("frame_"))
+        .map(({ id }) => parseInt(id?.split("_")[1] ?? "0"))
     ) + 1;
 
   const frameName = `Frame ${nextIndex}`;
@@ -81,8 +81,8 @@ const addFrameToCanvas = (canvas: Canvas | null) => {
     top: 100,
     width: 100,
     height: 100,
-    fill: 'transparent',
-    stroke: '#90EE90',
+    fill: "transparent",
+    stroke: "#90EE90",
     strokeWidth: 1,
     selectable: true,
     evented: true,
@@ -94,27 +94,23 @@ const addFrameToCanvas = (canvas: Canvas | null) => {
   canvas.setActiveObject(frame);
   canvas.renderAll();
 
-  frame.on('scaling', () => {
+  frame.on("scaling", () => {
     maintainStrokeWidth(frame);
     canvas.renderAll();
   });
 
-  frame.on('modified', () => {
+  frame.on("modified", () => {
     maintainStrokeWidth(frame);
     canvas.renderAll();
   });
 };
 
-const AddObjects = () => {
+const NavTools = () => {
   const canvas = useCanvasStore((state) => state.canvas);
 
   return (
     <div className="flex gap-1 p-2">
-      <Button
-        onClick={() => addFrameToCanvas(canvas)}
-        variant="ghost"
-        size="icon"
-      >
+      <Button onClick={() => addFrameToCanvas(canvas)} variant="ghost" size="icon">
         <CropIcon />
       </Button>
       <Button onClick={() => addRectangle(canvas)} variant="ghost" size="icon">
@@ -130,4 +126,4 @@ const AddObjects = () => {
   );
 };
 
-export default AddObjects;
+export default NavTools;
