@@ -1,7 +1,7 @@
 export function parseIntValue(value: string | number): number {
   if (!value) return 0;
 
-  return typeof value === 'string' ? parseInt(value, 10) : Math.floor(value);
+  return typeof value === "string" ? parseInt(value, 10) : Math.floor(value);
 }
 
 /**

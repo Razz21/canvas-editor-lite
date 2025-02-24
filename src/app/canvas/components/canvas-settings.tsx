@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { CanvasOptions } from 'fabric';
-import { INIT_CANVAS_OPTIONS, useCanvasStore } from '../stores/canvas-store';
-import { useShallow } from 'zustand/react/shallow';
-import { clamp, parseIntValue } from '../utils/numbers';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { CanvasOptions } from "fabric";
+import { INIT_CANVAS_OPTIONS, useCanvasStore } from "../stores/canvas-store";
+import { useShallow } from "zustand/react/shallow";
+import { clamp, parseIntValue } from "../utils/numbers";
 
 export type CanvasSettingsProps = {};
 
@@ -31,12 +31,9 @@ function CanvasSettings({}: CanvasSettingsProps) {
   };
 
   const handleChangeOption =
-    <Key extends keyof CanvasOptions>(
-      key: Key,
-      { numeric }: { numeric?: boolean } = {}
-    ) =>
+    <Key extends keyof CanvasOptions>(key: Key, { numeric }: { numeric?: boolean } = {}) =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      let value: string | number | undefined = e.target.value.trim()
+      let value: string | number | undefined = e.target.value.trim();
 
       if (numeric) {
         value = clamp(parseIntValue(value), 1, Infinity);
@@ -56,7 +53,7 @@ function CanvasSettings({}: CanvasSettingsProps) {
           <Input
             type="number"
             value={options.width}
-            onChange={handleChangeOption('width', { numeric: true })}
+            onChange={handleChangeOption("width", { numeric: true })}
           />
         </Label>
         <Label>
@@ -64,7 +61,7 @@ function CanvasSettings({}: CanvasSettingsProps) {
           <Input
             type="number"
             value={options.height}
-            onChange={handleChangeOption('height', { numeric: true })}
+            onChange={handleChangeOption("height", { numeric: true })}
           />
         </Label>
         <Label>
@@ -72,7 +69,7 @@ function CanvasSettings({}: CanvasSettingsProps) {
           <Input
             value={options.backgroundColor as string}
             type="color"
-            onChange={handleChangeOption('backgroundColor')}
+            onChange={handleChangeOption("backgroundColor")}
           />
         </Label>
       </div>

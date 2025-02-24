@@ -1,12 +1,12 @@
-import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
-import type { Canvas, CanvasOptions } from 'fabric';
-import { produce } from 'immer';
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
+import type { Canvas, CanvasOptions } from "fabric";
+import { produce } from "immer";
 
 export const INIT_CANVAS_OPTIONS = {
   width: 500,
   height: 500,
-  backgroundColor: '#ffffff',
+  backgroundColor: "#ffffff",
 } satisfies Partial<CanvasOptions>;
 
 interface CanvasState {
@@ -29,6 +29,6 @@ export const useCanvasStore = create<CanvasState>()(
           })
         ),
     }),
-    { name: 'CanvasStore' }
+    { name: "CanvasStore" }
   )
 );

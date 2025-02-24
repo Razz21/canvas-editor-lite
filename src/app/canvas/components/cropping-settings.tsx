@@ -1,18 +1,18 @@
-'use client;';
+"use client;";
 
-import { Button } from '@/components/ui/button';
+import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { FabricObject } from 'fabric';
-import { DownloadIcon } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useCanvasStore } from '../stores/canvas-store';
-import { useElementsStore } from '../stores/elements-store';
+} from "@/components/ui/select";
+import { FabricObject } from "fabric";
+import { DownloadIcon } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useCanvasStore } from "../stores/canvas-store";
+import { useElementsStore } from "../stores/elements-store";
 
 export type CroppingSettingsProps = {};
 
@@ -27,10 +27,10 @@ function CroppingSettings({}: CroppingSettingsProps) {
     if (!canvas) return;
 
     const framesFromCanvas = canvas
-      .getObjects('rect')
-      .filter((object) => object.name?.startsWith('Frame '));
+      .getObjects("rect")
+      .filter((object) => object.name?.startsWith("Frame "));
 
-    console.log('framesFromCanvas', framesFromCanvas);
+    console.log("framesFromCanvas", framesFromCanvas);
     setFrames(framesFromCanvas);
 
     setSelectedFrame(framesFromCanvas[0] ?? null);
@@ -42,7 +42,7 @@ function CroppingSettings({}: CroppingSettingsProps) {
 
   const handleFrameSelect = (frameId: string) => {
     const selected = frames.find((f) => f.id === frameId);
-    console.log('handleFrameSelect', { frameId, selected });
+    console.log("handleFrameSelect", { frameId, selected });
 
     if (!selected) return;
 
@@ -55,7 +55,7 @@ function CroppingSettings({}: CroppingSettingsProps) {
     if (!selectedFrame) return;
 
     frames.forEach((frame) => {
-      frame.set('visible', false);
+      frame.set("visible", false);
     });
 
     selectedFrame.set({
@@ -65,7 +65,7 @@ function CroppingSettings({}: CroppingSettingsProps) {
 
     const dataURL = canvas?.toDataURL({
       multiplier: 1,
-      format: 'png',
+      format: "png",
       left: selectedFrame.left,
       top: selectedFrame.top,
       width: selectedFrame.width * selectedFrame.scaleX,
@@ -79,21 +79,21 @@ function CroppingSettings({}: CroppingSettingsProps) {
     });
 
     frames.forEach((frame) => {
-      frame.set('visible', true);
+      frame.set("visible", true);
     });
 
     canvas?.renderAll();
 
-    const link = document.createElement('a');
+    const link = document.createElement("a");
 
     link.href = dataURL;
-    link.download = 'frame.png';
+    link.download = "frame.png";
     link.click();
   };
 
   return (
     <div className="bg-background p-4 rounded shadow-md space-y-4">
-      <Select value={selectedFrame?.id || ''} onValueChange={handleFrameSelect}>
+      <Select value={selectedFrame?.id || ""} onValueChange={handleFrameSelect}>
         <SelectTrigger className="w-[180px]">
           <SelectValue placeholder="Select a frame" />
         </SelectTrigger>

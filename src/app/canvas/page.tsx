@@ -1,4 +1,4 @@
-import PageClient from './page.client';
+import PageClient from "./page.client";
 
 export type PageProps = {
   params: Promise<{}>;

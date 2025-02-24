@@ -1,9 +1,9 @@
-import { create } from 'zustand';
-import { devtools } from 'zustand/middleware';
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 
 interface UIState {
-  activePanel: 'properties' | 'layers' | null;
-  setActivePanel: (panel: UIState['activePanel']) => void;
+  activePanel: "properties" | "layers" | null;
+  setActivePanel: (panel: UIState["activePanel"]) => void;
 }
 
 export const useUIStore = create<UIState>()(
