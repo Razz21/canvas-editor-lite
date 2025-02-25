@@ -30,7 +30,7 @@ export default function CanvasBase() {
       if (!obj) return;
       if (isGuidelineObject(obj)) return;
 
-      obj.name = obj.name ?? obj.type;
+      obj.name = obj.name ?? `New ${obj.type}`;
       obj.id = obj.id || `${obj.type}_${new Date().getTime()}`;
 
       console.log("object:added", obj);

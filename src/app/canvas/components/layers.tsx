@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { FabricObject } from "fabric";
-import { ComponentProps, useCallback, useEffect, useState } from "react";
+import { ComponentProps, ComponentType, useCallback, useEffect, useState } from "react";
 import {
   ArrowUpIcon,
   ArrowDownIcon,
@@ -11,14 +11,21 @@ import {
   LockIcon,
   LockOpenIcon,
   EyeOffIcon,
+  CircleIcon,
+  TypeIcon,
+  SquareIcon,
+  SlashIcon,
+  CircleHelpIcon,
+  SplineIcon,
 } from "lucide-react";
 import { isGuidelineObject } from "../utils/snap";
-import { useCanvasStore } from "../stores/canvas-store";
+import { ShapeType, useCanvasStore } from "../stores/canvas-store";
 import { ElementObject, useElementsStore } from "../stores/elements-store";
 import { useShallow } from "zustand/react/shallow";
 import { Separator } from "@/components/ui/separator";
 import { clamp } from "../utils/numbers";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Toggle } from "@/components/ui/toggle";
 
 export type LayerProps = {};
 
@@ -149,6 +156,7 @@ function Layers({}: LayerProps) {
 
     if (object) {
       canvas?.setActiveObject(object);
+      canvas?.requestRenderAll();
     }
   };
 
@@ -183,7 +191,7 @@ function Layers({}: LayerProps) {
   }, [canvas]);
 
   return (
-    <div className="bg-background rounded shadow-md space-y-2">
+    <div className="bg-background rounded shadow-md space-y-2 w-72">
       <div className="flex justify-between items-center p-2">
         <span>Layers</span>
         <span className="flex gap-1">
@@ -229,6 +237,23 @@ function Layers({}: LayerProps) {
 
 export default Layers;
 
+const LAYER_ITEM_ICON_MAP = {
+  circle: CircleIcon,
+  textbox: TypeIcon,
+  rect: SquareIcon,
+  line: SlashIcon,
+  path: SplineIcon,
+  default: CircleHelpIcon,
+} satisfies Partial<
+  Record<Lowercase<ShapeType> | "default", ComponentType<React.SVGProps<SVGSVGElement>>>
+>;
+
+function getIconForLayer(type: string) {
+  return (
+    LAYER_ITEM_ICON_MAP[type as keyof typeof LAYER_ITEM_ICON_MAP] || LAYER_ITEM_ICON_MAP.default
+  );
+}
+
 type LayerItemProps = {
   layer: ElementObject;
   selected: boolean;
@@ -246,6 +271,8 @@ function LayerItem({
   removeLayer,
   ...rest
 }: LayerItemProps) {
+  const Icon = getIconForLayer(layer.type);
+
   return (
     <li
       className={`${
@@ -253,35 +280,43 @@ function LayerItem({
       } p-1 rounded flex justify-between items-center ${className || ""}`}
       {...rest}
     >
-      <span>{layer.name}</span>
+      <div className="flex gap-2 items-center capitalize text-sm">
+        <span>{<Icon size="16" />}</span>
+        <span>{layer.name}</span>
+      </div>
       <div className="flex gap-1">
-        <Button
-          onClick={() => lockLayer(layer)}
-          size="icon"
-          variant="ghost"
-          className="[&_svg]:size-3 w-8 h-8"
-          data-active={layer.locked === true}
+        <Toggle
+          onClick={(e) => {
+            e.stopPropagation();
+            lockLayer(layer);
+          }}
+          size="sm"
+          variant="default"
+          pressed={layer.locked === true}
         >
           {layer.locked === true ? <LockIcon /> : <LockOpenIcon />}
-        </Button>
-        <Button
-          onClick={() => hideLayer(layer)}
-          size="icon"
-          variant="ghost"
-          className="[&_svg]:size-3 w-8 h-8"
-          data-active={layer.visible !== true}
+        </Toggle>
+        <Toggle
+          onClick={(e) => {
+            e.stopPropagation();
+            hideLayer(layer);
+          }}
+          size="sm"
+          variant="default"
+          pressed={layer.visible !== true}
         >
           {layer.visible ? <EyeIcon /> : <EyeOffIcon />}
-        </Button>
-        <Button
-          onClick={() => removeLayer(layer)}
-          size="icon"
-          variant="secondary"
-          className="[&_svg]:size-3 w-8 h-8"
-          data-active
+        </Toggle>
+        <Toggle
+          onClick={(e) => {
+            e.stopPropagation();
+            removeLayer(layer);
+          }}
+          size="sm"
+          variant="default"
         >
           <TrashIcon />
-        </Button>
+        </Toggle>
       </div>
     </li>
   );
