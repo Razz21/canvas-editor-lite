@@ -15,6 +15,7 @@ import {
 import {
   CircleIcon,
   CropIcon,
+  MousePointer2Icon,
   PencilIcon,
   SlashIcon,
   SplineIcon,
@@ -126,12 +127,13 @@ const addFrameToCanvas = (canvas: Canvas | null) => {
   });
 };
 
+// TODO: Reuse SHAPE_TYPES from canvas-store.ts
 const SHAPES = {
   CIRCLE: "CIRCLE",
   RECTANGLE: "RECTANGLE",
   LINE: "LINE",
   PATH: "PATH",
-  PENCIL: "PENCIL",
+  PENCIL: "PENCIL", // not shape
 } as const;
 
 type ShapeType = keyof typeof SHAPES;
@@ -141,7 +143,7 @@ const NavTools = () => {
 
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [shape, setShape] = useState<FabricObject | null>(null);
-  const [shapeType, setShapeType] = useState<ShapeType | string>("");
+  const [shapeType, setShapeType] = useState<ShapeType | string>("POINTER");
   const [originX, setOriginX] = useState<number>(0);
   const [originY, setOriginY] = useState<number>(0);
 
@@ -182,7 +184,7 @@ const NavTools = () => {
   ) => {
     setIsDrawing(false);
     setShape(null);
-    setShapeType("");
+    setShapeType("POINTER");
     if (canvas) {
       canvas.defaultCursor = "default";
       if (event.currentTarget) {
@@ -270,7 +272,7 @@ const NavTools = () => {
   ) => {
     setIsDrawing(false);
     setShape(null);
-    setShapeType("");
+    setShapeType("POINTER");
     if (canvas) {
       canvas.defaultCursor = "default";
       if (event.currentTarget) {
@@ -396,6 +398,9 @@ const NavTools = () => {
       <Separator orientation="vertical" className="h-auto" />
 
       <ToggleGroup type="single" value={shapeType} onValueChange={setCurrentShapeType}>
+        <ToggleGroupItem value={"POINTER"} aria-label="pointer">
+          <MousePointer2Icon />
+        </ToggleGroupItem>
         <ToggleGroupItem value={SHAPES.CIRCLE} aria-label="circle">
           <CircleIcon />
         </ToggleGroupItem>
