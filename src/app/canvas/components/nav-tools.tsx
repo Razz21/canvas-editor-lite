@@ -11,16 +11,20 @@ import {
   TPointerEvent,
   Line,
   PencilBrush,
+  Group,
+  ActiveSelection,
 } from "fabric";
 import {
   CircleIcon,
   CropIcon,
+  GroupIcon,
   MousePointer2Icon,
   PencilIcon,
   SlashIcon,
   SplineIcon,
   SquareIcon,
   TypeIcon,
+  UngroupIcon,
 } from "lucide-react";
 import { useCanvasStore } from "../stores/canvas-store";
 import { useEffect, useState } from "react";
@@ -125,6 +129,46 @@ const addFrameToCanvas = (canvas: Canvas | null) => {
     maintainStrokeWidth(frame);
     canvas.renderAll();
   });
+};
+
+function isGroupObject(object: FabricObject | Group | null | undefined): object is Group {
+  return !!object?.isType("group");
+}
+
+function isActiveSelectionObject(
+  object: FabricObject | Group | null | undefined
+): object is ActiveSelection {
+  return !!object?.isType("activeselection");
+}
+
+const groupSelected = (canvas: Canvas | null) => {
+  const activeObject = canvas?.getActiveObject();
+
+  if (!(canvas && isActiveSelectionObject(activeObject))) {
+    return;
+  }
+
+  const group = new Group(activeObject?.removeAll());
+
+  canvas.add(group);
+  canvas.setActiveObject(group);
+
+  canvas.requestRenderAll();
+};
+
+const unGroupSelected = (canvas: Canvas | null) => {
+  const activeObject = canvas?.getActiveObject();
+
+  if (!(canvas && isGroupObject(activeObject))) {
+    return;
+  }
+
+  const selection = new ActiveSelection(activeObject.removeAll(), {});
+
+  canvas.remove(activeObject);
+
+  canvas.setActiveObject(selection);
+  canvas.requestRenderAll();
 };
 
 // TODO: Reuse SHAPE_TYPES from canvas-store.ts
@@ -392,6 +436,12 @@ const NavTools = () => {
         </Button>
         <Button onClick={() => addTextBox(canvas)} variant="ghost" size="icon">
           <TypeIcon />
+        </Button>
+        <Button onClick={() => groupSelected(canvas)} variant="ghost" size="icon">
+          <GroupIcon />
+        </Button>
+        <Button onClick={() => unGroupSelected(canvas)} variant="ghost" size="icon">
+          <UngroupIcon />
         </Button>
       </div>
 

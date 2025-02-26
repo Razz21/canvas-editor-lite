@@ -1,7 +1,7 @@
 "use client;";
 
 import { Button } from "@/components/ui/button";
-import { FabricObject } from "fabric";
+import { FabricObject, Group } from "fabric";
 import { ComponentProps, ComponentType, useCallback, useEffect, useState } from "react";
 import {
   ArrowUpIcon,
@@ -17,6 +17,7 @@ import {
   SlashIcon,
   CircleHelpIcon,
   SplineIcon,
+  LayersIcon,
 } from "lucide-react";
 import { isGuidelineObject } from "../utils/snap";
 import { ShapeType, useCanvasStore } from "../stores/canvas-store";
@@ -28,6 +29,10 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Toggle } from "@/components/ui/toggle";
 
 export type LayerProps = {};
+
+const isObjectInGroup = (object: FabricObject): boolean => {
+  return !!object.group?.isType("group");
+};
 
 function Layers({}: LayerProps) {
   const canvas = useCanvasStore((state) => state.canvas);
@@ -119,8 +124,9 @@ function Layers({}: LayerProps) {
     if (!canvas) return;
 
     const objects = canvas.getObjects();
-    const filteredObjects = objects.filter((obj) => !isGuidelineObject(obj));
+    const filteredObjects = objects.filter((obj) => !isObjectInGroup(obj));
 
+    // TODO: validate if zIndex is required
     filteredObjects.forEach((object, index) => {
       object.zIndex = index;
     });
@@ -209,21 +215,14 @@ function Layers({}: LayerProps) {
       </div>
       <Separator />
       <ScrollArea className="h-[40vh] p-2">
-        <ul className=" overflow-auto">
-          {elements.map((layer) => (
-            <LayerItem
-              key={layer.id}
-              hideLayer={hideLayer}
-              lockLayer={lockLayer}
-              removeLayer={removeLayer}
-              layer={layer}
-              selected={selectedLayers.includes(layer.id)}
-              onClick={() => {
-                selectLayerInCanvas(layer.id);
-              }}
-            />
-          ))}
-        </ul>
+        <LayerTree
+          layers={elements}
+          hideLayer={hideLayer}
+          lockLayer={lockLayer}
+          removeLayer={removeLayer}
+          selectedLayers={selectedLayers}
+          selectLayerInCanvas={selectLayerInCanvas}
+        />
       </ScrollArea>
     </div>
   );
@@ -238,6 +237,7 @@ const LAYER_ITEM_ICON_MAP = {
   line: SlashIcon,
   path: SplineIcon,
   default: CircleHelpIcon,
+  group: LayersIcon,
 } satisfies Partial<
   Record<Lowercase<ShapeType> | "default", ComponentType<React.SVGProps<SVGSVGElement>>>
 >;
@@ -248,7 +248,56 @@ function getIconForLayer(type: string) {
   );
 }
 
-type LayerItemProps = {
+type LayerTreeProps = {
+  layers: FabricObject[];
+  selectedLayers: FabricObject["id"][];
+  lockLayer: (element: FabricObject) => void;
+  hideLayer: (element: FabricObject) => void;
+  removeLayer: (element: FabricObject) => void;
+  selectLayerInCanvas: (id: FabricObject["id"]) => void;
+} & ComponentProps<"ul">;
+
+function LayerTree({
+  layers,
+  hideLayer,
+  lockLayer,
+  removeLayer,
+  selectedLayers,
+  selectLayerInCanvas,
+  className = "",
+}: LayerTreeProps) {
+  return (
+    <ul className={`overflow-auto ${className}`}>
+      {layers.map((layer) => (
+        <LayerTreeItem
+          key={layer.id}
+          hideLayer={hideLayer}
+          lockLayer={lockLayer}
+          removeLayer={removeLayer}
+          layer={layer}
+          selected={selectedLayers.includes(layer.id)}
+          onClick={() => {
+            selectLayerInCanvas(layer.id);
+          }}
+        >
+          {layer.type === "group" ? (
+            <LayerTree
+              className="pl-4"
+              layers={(layer as Group).getObjects()}
+              hideLayer={hideLayer}
+              lockLayer={lockLayer}
+              removeLayer={removeLayer}
+              selectedLayers={[]}
+              selectLayerInCanvas={selectLayerInCanvas}
+            />
+          ) : null}
+        </LayerTreeItem>
+      ))}
+    </ul>
+  );
+}
+
+type LayerTreeItemProps = {
   layer: FabricObject;
   selected: boolean;
   lockLayer: (element: FabricObject) => void;
@@ -256,62 +305,64 @@ type LayerItemProps = {
   removeLayer: (element: FabricObject) => void;
 } & ComponentProps<"li">;
 
-function LayerItem({
+function LayerTreeItem({
   selected,
-  className,
   hideLayer,
   layer,
   lockLayer,
   removeLayer,
+  children,
   ...rest
-}: LayerItemProps) {
+}: LayerTreeItemProps) {
   const Icon = getIconForLayer(layer.type);
 
   return (
-    <li
-      className={`${
-        selected ? "bg-neutral-500/10" : ""
-      } p-1 rounded flex justify-between items-center ${className || ""}`}
-      {...rest}
-    >
-      <div className="flex gap-2 items-center capitalize text-sm">
-        <span>{<Icon size="16" />}</span>
-        <span>{layer.name}</span>
+    <li {...rest}>
+      <div
+        className={`${
+          selected ? "bg-neutral-500/10" : ""
+        } flex justify-between items-center p-1 rounded `}
+      >
+        <div className="flex gap-2 items-center capitalize text-sm">
+          <span>{<Icon size="16" />}</span>
+          <span>{layer.name}</span>
+        </div>
+        <div className="flex gap-1">
+          <Toggle
+            onClick={(e) => {
+              e.stopPropagation();
+              lockLayer(layer);
+            }}
+            size="sm"
+            variant="default"
+            pressed={layer.locked === true}
+          >
+            {layer.locked === true ? <LockIcon /> : <LockOpenIcon />}
+          </Toggle>
+          <Toggle
+            onClick={(e) => {
+              e.stopPropagation();
+              hideLayer(layer);
+            }}
+            size="sm"
+            variant="default"
+            pressed={layer.visible !== true}
+          >
+            {layer.visible ? <EyeIcon /> : <EyeOffIcon />}
+          </Toggle>
+          <Toggle
+            onClick={(e) => {
+              e.stopPropagation();
+              removeLayer(layer);
+            }}
+            size="sm"
+            variant="default"
+          >
+            <TrashIcon />
+          </Toggle>
+        </div>
       </div>
-      <div className="flex gap-1">
-        <Toggle
-          onClick={(e) => {
-            e.stopPropagation();
-            lockLayer(layer);
-          }}
-          size="sm"
-          variant="default"
-          pressed={layer.locked === true}
-        >
-          {layer.locked === true ? <LockIcon /> : <LockOpenIcon />}
-        </Toggle>
-        <Toggle
-          onClick={(e) => {
-            e.stopPropagation();
-            hideLayer(layer);
-          }}
-          size="sm"
-          variant="default"
-          pressed={layer.visible !== true}
-        >
-          {layer.visible ? <EyeIcon /> : <EyeOffIcon />}
-        </Toggle>
-        <Toggle
-          onClick={(e) => {
-            e.stopPropagation();
-            removeLayer(layer);
-          }}
-          size="sm"
-          variant="default"
-        >
-          <TrashIcon />
-        </Toggle>
-      </div>
+      {children}
     </li>
   );
 }

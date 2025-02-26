@@ -7,6 +7,12 @@ declare module "fabric" {
     zIndex?: number;
     locked?: boolean;
   }
+  interface FabricObjectProps {
+    name?: string;
+    id?: string;
+    zIndex?: number;
+    locked?: boolean;
+  }
 
   interface Canvas {
     getObjectById: (id?: string | null) => FabricObject | undefined;
