@@ -2,10 +2,10 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Circle, Rect, Textbox } from "fabric";
+import { Circle, FabricObject, Group, Rect, Textbox } from "fabric";
 import { ChangeEvent, ComponentProps, ComponentType, ReactNode, useEffect, useState } from "react";
-import { useCanvasStore } from "../stores/canvas-store";
-import { ElementObject, useElementsStore } from "../stores/elements-store";
+import { useCanvasStore } from "../../stores/canvas-store";
+import { ElementObject, useElementsStore } from "../../stores/elements-store";
 import { useShallow } from "zustand/react/shallow";
 import { Button } from "@/components/ui/button";
 import {
@@ -42,7 +42,7 @@ import { Toggle } from "@/components/ui/toggle";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export type LayerSettingsProps = {};
-type ShapeProps = ElementObject & Circle & Rect & Textbox;
+type ShapeProps = ElementObject & Circle & Rect & Textbox & Group;
 
 const initProperties = {
   // Common
@@ -55,7 +55,7 @@ const initProperties = {
   top: 0,
 } satisfies Partial<ShapeProps>;
 
-type AlignDirection = "left" | "right" | "top" | "bottom" | "horizontal" | "vertical";
+type AlignmentDirection = "left" | "right" | "top" | "bottom" | "horizontal" | "vertical";
 
 const LAYER_ITEM_ICON_MAP = {
   left: AlignStartVerticalIcon,
@@ -64,18 +64,19 @@ const LAYER_ITEM_ICON_MAP = {
   top: AlignStartHorizontalIcon,
   vertical: AlignCenterHorizontalIcon,
   bottom: AlignEndHorizontalIcon,
-} satisfies Record<Lowercase<AlignDirection>, ComponentType<React.SVGProps<SVGSVGElement>>>;
+} satisfies Record<Lowercase<AlignmentDirection>, ComponentType<React.SVGProps<SVGSVGElement>>>;
 
 function LayerSettings({}: LayerSettingsProps) {
   const canvas = useCanvasStore((state) => state.canvas);
-  const selectedObject = useElementsStore((state) => state.getSelected());
+  // const selectedObject = useElementsStore((state) => state.getSelected());
 
-  const { setSelectedId } = useElementsStore(
+  const {} = useElementsStore(
     useShallow((state) => ({
       selectedObject: state.getSelected(),
       setSelectedId: state.setSelectedId,
     }))
   );
+  const [selectedObject, setSelectedObject] = useState<ElementObject | Group | null>(null);
 
   const [properties, setProperties] = useState<Partial<ShapeProps>>({
     ...initProperties,
@@ -84,16 +85,16 @@ function LayerSettings({}: LayerSettingsProps) {
   useEffect(() => {
     if (canvas) {
       canvas.on("selection:created", (event) => {
-        console.log("selection created", event);
+        // console.log("selection created", event);
         handleObjectSelection(event);
       });
       canvas.on("selection:updated", (event) => {
-        console.log("selection updated", event);
+        // console.log("selection updated", event);
         handleObjectSelection(event);
       });
       canvas.on("selection:cleared", (event) => {
-        console.log("selection cleared", event);
-        setSelectedId(null);
+        // console.log("selection cleared", event);
+        setSelectedObject(null);
       });
 
       canvas.on("object:modified", (event) => {
@@ -113,11 +114,13 @@ function LayerSettings({}: LayerSettingsProps) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleObjectSelection = (event: any) => {
-    const object = event.target || event.selected?.[0];
+    const object = canvas?.getActiveObject();
+    // const object = event.target || event.selected?.[0];
 
-    setSelectedId(object?.id ?? null);
+    setSelectedObject(object ?? null);
 
-    console.log("handleObjectSelection", event);
+    // console.warn(">>>>>>>>>>>>>", object);
+    // console.warn("handleObjectSelection", event);
 
     if (!object) return;
 
@@ -132,13 +135,21 @@ function LayerSettings({}: LayerSettingsProps) {
     });
   };
 
+  function isGroupObject(object: ElementObject | Group | null): object is Group {
+    return ["activeselection", "group"].includes(object?.type.toLowerCase() ?? "");
+  }
+
   const handlePropertyChange = (property: typeof properties) => {
     setProperties((prev) => ({ ...prev, ...property }));
 
-    if (selectedObject) {
+    if (!selectedObject || !canvas) return;
+
+    if (isGroupObject(selectedObject)) {
+      selectedObject.getObjects().forEach((object) => object.set(property).setCoords());
+    } else {
       selectedObject.set(property).setCoords();
-      canvas?.renderAll();
     }
+    canvas.renderAll();
   };
 
   const handleValueChange = (property: keyof typeof properties) => (value: unknown) => {
@@ -173,7 +184,7 @@ function LayerSettings({}: LayerSettingsProps) {
     }
   };
 
-  const alignObject = (object: ElementObject | null) => (direction: AlignDirection) => {
+  const alignObject = (object: ElementObject | null) => (direction: AlignmentDirection) => {
     if (!object || !canvas) return;
 
     const properties = {} as { left?: number; top?: number };
@@ -204,7 +215,69 @@ function LayerSettings({}: LayerSettingsProps) {
     object.set(properties).setCoords();
     canvas.renderAll();
   };
-  console.log("selectedObject", selectedObject);
+
+  const getBoundingBox = (objects: FabricObject[]) => {
+    if (objects.length === 0) return null;
+
+    const minX = Math.min(...objects.map((obj) => obj.left ?? 0));
+    const minY = Math.min(...objects.map((obj) => obj.top ?? 0));
+    const maxX = Math.max(
+      ...objects.map((obj) => (obj.left ?? 0) + (obj.width ?? 0) * (obj.scaleX ?? 1))
+    );
+    const maxY = Math.max(
+      ...objects.map((obj) => (obj.top ?? 0) + (obj.height ?? 0) * (obj.scaleY ?? 1))
+    );
+
+    return {
+      minX,
+      minY,
+      maxX,
+      maxY,
+      width: maxX - minX,
+      height: maxY - minY,
+    };
+  };
+
+  const alignSelection = (object: Group, direction: AlignmentDirection) => {
+    if (!isGroupObject(object) || !canvas) return;
+
+    const objects = object.getObjects();
+    if (objects.length === 0) return;
+
+    const boundingBox = getBoundingBox(objects);
+    if (!boundingBox) return;
+
+    objects.forEach((obj) => {
+      const properties = {} as { left?: number; top?: number };
+
+      switch (direction) {
+        case "left":
+          properties.left = boundingBox.minX;
+          break;
+        case "right":
+          properties.left = boundingBox.maxX - (obj.width ?? 0) * (obj.scaleX ?? 1);
+          break;
+        case "top":
+          properties.top = boundingBox.minY;
+          break;
+        case "bottom":
+          properties.top = boundingBox.maxY - (obj.height ?? 0) * (obj.scaleY ?? 1);
+          break;
+        case "horizontal":
+          properties.left =
+            boundingBox.minX + (boundingBox.width - (obj.width ?? 0) * (obj.scaleX ?? 1)) / 2;
+          break;
+        case "vertical":
+          properties.top =
+            boundingBox.minY + (boundingBox.height - (obj.height ?? 0) * (obj.scaleY ?? 1)) / 2;
+          break;
+      }
+
+      obj.set(properties).setCoords();
+    });
+
+    canvas.renderAll();
+  };
 
   return (
     <ScrollArea className="h-[50vh] w-64">
@@ -213,7 +286,7 @@ function LayerSettings({}: LayerSettingsProps) {
           {Object.entries(LAYER_ITEM_ICON_MAP).map(([key, Icon]) => (
             <Button
               key={key}
-              onClick={() => alignObject(selectedObject)(key as AlignDirection)}
+              onClick={() => alignObject(selectedObject)(key as AlignmentDirection)}
               size="icon"
               className="w-8 h-8"
               variant="outline"
@@ -223,6 +296,23 @@ function LayerSettings({}: LayerSettingsProps) {
           ))}
         </div>
 
+        <Separator className="my-1" />
+        {isGroupObject(selectedObject) && (
+          <div>
+            <div>Alignment</div>
+            {Object.entries(LAYER_ITEM_ICON_MAP).map(([key, Icon]) => (
+              <Button
+                key={key}
+                onClick={() => alignSelection(selectedObject, key as AlignmentDirection)}
+                size="icon"
+                className="w-8 h-8"
+                variant="outline"
+              >
+                <Icon />
+              </Button>
+            ))}
+          </div>
+        )}
         <Separator className="my-1" />
 
         <div className="grid grid-cols-2 gap-4">
@@ -304,7 +394,7 @@ function LayerSettings({}: LayerSettingsProps) {
                   type="number"
                   min={0}
                   step={1}
-                  value={properties.strokeWidth}
+                  value={properties.strokeWidth ?? 0}
                   onChange={handleEventChangeNumeric("strokeWidth")}
                 />
               </div>
@@ -471,7 +561,7 @@ export default LayerSettings;
 
 function ColorInputItem({
   className = "",
-  value = "",
+  value = "#000000",
   onChange,
   ...rest
 }: ComponentProps<"input">) {
