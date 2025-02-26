@@ -1,4 +1,4 @@
-import { Canvas, FabricObject, Line } from "fabric";
+import { Canvas, FabricObject, FabricObjectProps, Line } from "fabric";
 
 const spappingDistance = 10;
 
@@ -91,28 +91,32 @@ export const handleObjectMoving = (canvas: Canvas, object: FabricObject) => {
   canvas.renderAll();
 };
 
-export const createVerticalGuideline = (canvas: Canvas, x: number, id: string) => {
-  return new Line([x, 0, x, canvas.height], {
-    id,
+// TODO: Avoid triggering "object:xxx" event for temp lines
+const generateLine = (
+  coords: [number, number, number, number],
+  props: Partial<FabricObjectProps> = {}
+) => {
+  return new Line(coords, {
     stroke: "red",
     strokeWidth: 1,
-    scalable: false,
     evented: false,
+    selectable: false,
+    hoverCursor: "default",
+    hasControls: false,
+    hasBorders: false,
+    perPixelTargetFind: false,
     strokeDashArray: [5, 5],
     opacity: 0.5,
+    ...props,
   });
 };
 
+export const createVerticalGuideline = (canvas: Canvas, x: number, id: string) => {
+  return generateLine([x, 0, x, canvas.height], { id });
+};
+
 export const createHorizontalGuideline = (canvas: Canvas, y: number, id: string) => {
-  return new Line([0, y, canvas.width, y], {
-    id,
-    stroke: "red",
-    strokeWidth: 1,
-    scalable: false,
-    evented: false,
-    strokeDashArray: [5, 5],
-    opacity: 0.5,
-  });
+  return generateLine([0, y, canvas.width, y], { id });
 };
 
 export const clearGuidelines = (canvas: Canvas) => {
