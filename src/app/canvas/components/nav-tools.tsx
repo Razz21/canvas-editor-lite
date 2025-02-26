@@ -13,16 +13,18 @@ import {
   PencilBrush,
   Group,
   ActiveSelection,
+  Ellipse,
 } from "fabric";
 import {
   CircleIcon,
+  CopyIcon,
   CropIcon,
   GroupIcon,
   MousePointer2Icon,
   PencilIcon,
   SlashIcon,
-  SplineIcon,
   SquareIcon,
+  TrashIcon,
   TypeIcon,
   UngroupIcon,
 } from "lucide-react";
@@ -30,6 +32,16 @@ import { useCanvasStore } from "../stores/canvas-store";
 import { useEffect, useState } from "react";
 import { Separator } from "@/components/ui/separator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
+const handleKeyEvent = (canvas: Canvas) => (e: KeyboardEvent) => {
+  if (e.key === "Delete") {
+    removeSelected(canvas);
+  } else if (e.ctrlKey && e.key === "d") {
+    e.preventDefault();
+    cloneSelected(canvas);
+    e.stopPropagation();
+  }
+};
 
 function addRectangle(canvas: Canvas | null) {
   if (!canvas) return;
@@ -171,6 +183,60 @@ const unGroupSelected = (canvas: Canvas | null) => {
   canvas.requestRenderAll();
 };
 
+const cloneSelected = async (canvas: Canvas | null) => {
+  const activeObject = canvas?.getActiveObject();
+
+  if (!activeObject || !canvas) {
+    return;
+  }
+  const cloned = await activeObject.clone();
+
+  canvas?.discardActiveObject();
+
+  cloned.set({
+    left: activeObject.left + 10,
+    top: activeObject.top + 10,
+    evented: true,
+  });
+
+  if (cloned instanceof ActiveSelection) {
+    // active selection needs a reference to the canvas.
+    cloned.canvas = canvas;
+
+    cloned.forEachObject((obj) => {
+      canvas.add(obj);
+    });
+    // this should solve the unselectability
+    cloned.setCoords();
+  } else {
+    canvas.add(cloned);
+  }
+
+  canvas?.setActiveObject(cloned);
+  canvas?.requestRenderAll();
+};
+
+const removeSelected = (canvas: Canvas | null) => {
+  const activeObject = canvas?.getActiveObject();
+
+  if (!activeObject || !canvas) {
+    return;
+  }
+
+  if (activeObject instanceof Group) {
+    // active selection needs a reference to the canvas.
+    activeObject.canvas = canvas;
+
+    activeObject.forEachObject((obj) => {
+      canvas.remove(obj);
+    });
+  }
+  canvas.remove(activeObject);
+  canvas?.discardActiveObject();
+
+  canvas?.requestRenderAll();
+};
+
 // TODO: Reuse SHAPE_TYPES from canvas-store.ts
 const SHAPES = {
   CIRCLE: "CIRCLE",
@@ -195,13 +261,12 @@ const NavTools = () => {
     const pointer = canvas?.getViewportPoint(event.e);
     if (!canvas || !pointer) return;
 
-    const newCircle = new Circle({
+    const newCircle = new Ellipse({
       left: pointer.x,
       top: pointer.y,
-      // originX: "left",
-      // originY: "top",
       fill: "transparent",
-      radius: 0,
+      rx: 0,
+      ry: 0,
       stroke: "black",
       strokeWidth: 2,
       selectable: true,
@@ -209,18 +274,27 @@ const NavTools = () => {
     });
     setOriginX(pointer.x);
     setOriginY(pointer.y);
+
     canvas.add(newCircle);
     setShape(newCircle);
     setIsDrawing(true);
   };
 
   const handleMouseMoveCircle = (event: TPointerEventInfo<TPointerEvent>) => {
-    if (isDrawing && shape && canvas) {
-      const pointer = canvas.getViewportPoint(event.e);
-      const radius = Math.hypot(pointer.x - originX, pointer.y - originY);
-      shape.set({ radius });
-      canvas.renderAll();
+    if (!(isDrawing && shape && canvas)) return;
+    const pointer = canvas.getViewportPoint(event.e);
+
+    shape.set({
+      rx: Math.abs(originX - pointer.x) / 2,
+      ry: Math.abs(originY - pointer.y) / 2,
+    });
+    if (originX > pointer.x) {
+      shape.set({ left: pointer.x });
     }
+    if (originY > pointer.y) {
+      shape.set({ top: pointer.y });
+    }
+    canvas.renderAll();
   };
 
   const handleMouseUpCircle = (
@@ -229,11 +303,9 @@ const NavTools = () => {
     setIsDrawing(false);
     setShape(null);
     setShapeType("POINTER");
-    if (canvas) {
-      canvas.defaultCursor = "default";
-      if (event.currentTarget) {
-        canvas.setActiveObject(event.currentTarget);
-      }
+
+    if (event.currentTarget) {
+      canvas?.setActiveObject(event.currentTarget);
     }
   };
 
@@ -391,16 +463,18 @@ const NavTools = () => {
     } else {
       canvas.isDrawingMode = false;
     }
-
     canvas?.on("mouse:down", handleMouseDown);
     canvas?.on("mouse:move", handleMouseMove);
     canvas?.on("mouse:up", handleMouseUp);
 
+    const keyDownHandler = handleKeyEvent(canvas);
+    document.addEventListener("keydown", keyDownHandler);
     return () => {
       if (canvas) {
         canvas.off("mouse:down", handleMouseDown);
         canvas.off("mouse:move", handleMouseMove);
         canvas.off("mouse:up", handleMouseUp);
+        document.removeEventListener("keydown", keyDownHandler);
       }
     };
   }, [canvas, shapeType, isDrawing, shape, originX, originY]);
@@ -443,6 +517,12 @@ const NavTools = () => {
         <Button onClick={() => unGroupSelected(canvas)} variant="ghost" size="icon">
           <UngroupIcon />
         </Button>
+        <Button onClick={() => cloneSelected(canvas)} variant="ghost" size="icon">
+          <CopyIcon />
+        </Button>
+        <Button onClick={() => removeSelected(canvas)} variant="ghost" size="icon">
+          <TrashIcon />
+        </Button>
       </div>
 
       <Separator orientation="vertical" className="h-auto" />
@@ -459,9 +539,6 @@ const NavTools = () => {
         </ToggleGroupItem>
         <ToggleGroupItem value={SHAPES.LINE} aria-label="line">
           <SlashIcon />
-        </ToggleGroupItem>
-        <ToggleGroupItem value={SHAPES.PATH} aria-label="path">
-          <SplineIcon />
         </ToggleGroupItem>
         <ToggleGroupItem value={SHAPES.PENCIL} aria-label="pencil">
           <PencilIcon />

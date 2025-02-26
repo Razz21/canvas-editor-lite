@@ -40,6 +40,7 @@ import { ButtonGroup, ButtonGroupItem } from "@/components/button-group";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Toggle } from "@/components/ui/toggle";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { AlignmentDirection } from "./helpers";
 
 export type LayerSettingsProps = {};
 type ShapeProps = ElementObject & Circle & Rect & Textbox & Group;
@@ -54,8 +55,6 @@ const initProperties = {
   left: 0,
   top: 0,
 } satisfies Partial<ShapeProps>;
-
-type AlignmentDirection = "left" | "right" | "top" | "bottom" | "horizontal" | "vertical";
 
 const LAYER_ITEM_ICON_MAP = {
   left: AlignStartVerticalIcon,
@@ -86,11 +85,11 @@ function LayerSettings({}: LayerSettingsProps) {
     if (canvas) {
       canvas.on("selection:created", (event) => {
         // console.log("selection created", event);
-        handleObjectSelection(event);
+        handleObjectSelection(event.selected[0]);
       });
       canvas.on("selection:updated", (event) => {
         // console.log("selection updated", event);
-        handleObjectSelection(event);
+        handleObjectSelection(event.selected[0]);
       });
       canvas.on("selection:cleared", (event) => {
         // console.log("selection cleared", event);
@@ -98,13 +97,13 @@ function LayerSettings({}: LayerSettingsProps) {
       });
 
       canvas.on("object:modified", (event) => {
-        handleObjectSelection(event);
+        handleObjectSelection(event.target);
       });
       canvas.on("object:rotating", (event) => {
-        handleObjectSelection(event);
+        handleObjectSelection(event.target);
       });
       canvas.on("object:scaling", (event) => {
-        handleObjectSelection(event);
+        handleObjectSelection(event.target);
       });
     }
     return () => {
@@ -113,14 +112,10 @@ function LayerSettings({}: LayerSettingsProps) {
   }, [canvas]);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleObjectSelection = (event: any) => {
-    const object = canvas?.getActiveObject();
-    // const object = event.target || event.selected?.[0];
+  const handleObjectSelection = (object?: FabricObject) => {
+    // const object = canvas?.getActiveObject();
 
     setSelectedObject(object ?? null);
-
-    // console.warn(">>>>>>>>>>>>>", object);
-    // console.warn("handleObjectSelection", event);
 
     if (!object) return;
 
@@ -280,7 +275,7 @@ function LayerSettings({}: LayerSettingsProps) {
   };
 
   return (
-    <ScrollArea className="h-[50vh] w-64">
+    <ScrollArea className="h-[50vh] w-72">
       <div className="flex flex-col gap-2 p-2 text-sm">
         <div className="flex gap-1 flex-wrap">
           {Object.entries(LAYER_ITEM_ICON_MAP).map(([key, Icon]) => (
@@ -298,28 +293,29 @@ function LayerSettings({}: LayerSettingsProps) {
 
         <Separator className="my-1" />
         {isGroupObject(selectedObject) && (
-          <div>
-            <div>Alignment</div>
-            {Object.entries(LAYER_ITEM_ICON_MAP).map(([key, Icon]) => (
-              <Button
-                key={key}
-                onClick={() => alignSelection(selectedObject, key as AlignmentDirection)}
-                size="icon"
-                className="w-8 h-8"
-                variant="outline"
-              >
-                <Icon />
-              </Button>
-            ))}
-          </div>
+          <>
+            <div>
+              <div>Alignment</div>
+              {Object.entries(LAYER_ITEM_ICON_MAP).map(([key, Icon]) => (
+                <Button
+                  key={key}
+                  onClick={() => alignSelection(selectedObject, key as AlignmentDirection)}
+                  size="icon"
+                  className="w-8 h-8"
+                  variant="outline"
+                >
+                  <Icon />
+                </Button>
+              ))}
+            </div>
+            <Separator className="my-1" />
+          </>
         )}
-        <Separator className="my-1" />
 
         <div className="grid grid-cols-2 gap-4">
           <InputItem
             label="X"
             type="number"
-            min={0}
             step={1}
             value={properties.left}
             onChange={handleEventChangeNumeric("left")}
@@ -327,7 +323,6 @@ function LayerSettings({}: LayerSettingsProps) {
           <InputItem
             label="Y"
             type="number"
-            min={0}
             step={1}
             value={properties.top}
             onChange={handleEventChangeNumeric("top")}
@@ -366,6 +361,39 @@ function LayerSettings({}: LayerSettingsProps) {
             value={properties.opacity}
             onChange={handleEventChangeNumeric("opacity")}
           />
+          {properties.rx ? (
+            <>
+              <InputItem
+                label="RX"
+                type="number"
+                min={0}
+                step={1}
+                value={properties.rx}
+                onChange={handleEventChangeNumeric("rx")}
+              />
+              <InputItem
+                label="RY"
+                type="number"
+                min={0}
+                step={1}
+                value={properties.ry}
+                onChange={handleEventChangeNumeric("ry")}
+              />
+            </>
+          ) : null}
+          {properties.radius ? (
+            <>
+              <InputItem
+                label="R"
+                type="number"
+                min={0}
+                step={1}
+                value={properties.radius}
+                onChange={handleEventChangeNumeric("radius")}
+              />
+              <div />
+            </>
+          ) : null}
         </div>
         <Separator className="my-1" />
         <div className="space-y-2">
@@ -421,8 +449,8 @@ function LayerSettings({}: LayerSettingsProps) {
                   className="gap-1"
                   variant="outline"
                   size="sm"
-                  value={properties.strokeLineCap}
-                  onValueChange={handleValueChange("strokeLineCap")}
+                  value={properties.strokeLineJoin}
+                  onValueChange={handleValueChange("strokeLineJoin")}
                 >
                   {["bevel", "miter", "round"].map((value) => (
                     <ButtonGroupItem value={value} key={value}>
