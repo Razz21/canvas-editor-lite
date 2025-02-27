@@ -19,7 +19,6 @@ import {
   SplineIcon,
   LayersIcon,
 } from "lucide-react";
-import { isGuidelineObject } from "../utils/snap";
 import { ShapeType, useCanvasStore } from "../stores/canvas-store";
 import { useElementsStore } from "../stores/elements-store";
 import { useShallow } from "zustand/react/shallow";
@@ -120,7 +119,7 @@ function Layers({}: LayerProps) {
     updateLayers();
   };
   const updateLayers = <UpdateEvent extends { target: FabricObject }>(event?: UpdateEvent) => {
-    if (event && isGuidelineObject(event.target)) return;
+    console.log("updateLayers", event);
     if (!canvas) return;
 
     const objects = canvas.getObjects();
@@ -170,7 +169,6 @@ function Layers({}: LayerProps) {
 
   useEffect(() => {
     if (canvas) {
-      // TODO avoid re-rendering when snap guidelines are triggered
       canvas.on("object:added", updateLayers);
       canvas.on("object:removed", updateLayers);
       canvas.on("object:modified", updateLayers);

@@ -23,6 +23,7 @@ export const handleObjectMoving = (canvas: Canvas, object: FabricObject) => {
     object.set("left", 0);
     if (!guidelineExists(canvas, "vertical-left")) {
       const line = createVerticalGuideline(canvas, 0, "vertical-left");
+      line.canvas = canvas;
       canvas.add(line);
     }
 
@@ -33,6 +34,7 @@ export const handleObjectMoving = (canvas: Canvas, object: FabricObject) => {
     object.set("top", 0);
     if (!guidelineExists(canvas, "horizontal-top")) {
       const line = createHorizontalGuideline(canvas, 0, "horizontal-top");
+      line.canvas = canvas;
       canvas.add(line);
     }
 
@@ -43,6 +45,7 @@ export const handleObjectMoving = (canvas: Canvas, object: FabricObject) => {
     object.set("left", canvasWidth - object.width * object.scaleX);
     if (!guidelineExists(canvas, "vertical-right")) {
       const line = createVerticalGuideline(canvas, canvasWidth, "vertical-right");
+      line.canvas = canvas;
       canvas.add(line);
     }
 
@@ -53,6 +56,7 @@ export const handleObjectMoving = (canvas: Canvas, object: FabricObject) => {
     object.set("top", canvasHeight - object.height * object.scaleY);
     if (!guidelineExists(canvas, "horizontal-bottom")) {
       const line = createHorizontalGuideline(canvas, canvasHeight, "horizontal-bottom");
+      line.canvas = canvas;
       canvas.add(line);
     }
 
@@ -63,6 +67,7 @@ export const handleObjectMoving = (canvas: Canvas, object: FabricObject) => {
     object.set("left", canvasWidth / 2 - (object.width * object.scaleX) / 2);
     if (!guidelineExists(canvas, "vertical-center")) {
       const line = createVerticalGuideline(canvas, canvasWidth / 2, "vertical-center");
+      line.canvas = canvas;
       canvas.add(line);
     }
 
@@ -73,6 +78,7 @@ export const handleObjectMoving = (canvas: Canvas, object: FabricObject) => {
     object.set("top", canvasHeight / 2 - (object.height * object.scaleY) / 2);
     if (!guidelineExists(canvas, "horizontal-center")) {
       const line = createHorizontalGuideline(canvas, canvasHeight / 2, "horizontal-center");
+      line.canvas = canvas;
       canvas.add(line);
     }
 

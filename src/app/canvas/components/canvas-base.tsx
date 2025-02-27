@@ -1,19 +1,13 @@
 import { useEffect, useRef } from "react";
 import { INIT_CANVAS_OPTIONS, useCanvasStore } from "../stores/canvas-store";
 import { useElementsStore } from "../stores/elements-store";
-import { BasicTransformEvent, Canvas, FabricObject } from "fabric";
-import { clearGuidelines, handleObjectMoving, isGuidelineObject } from "../utils/snap";
+import { Canvas } from "fabric";
+import { initAligningGuidelines } from "fabric/extensions";
 
 export default function CanvasBase() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const setCanvas = useCanvasStore((state) => state.setCanvas);
   const addElement = useElementsStore((state) => state.addElement);
-
-  const handleObjectMovingCallback =
-    (canvas: Canvas) => (event: BasicTransformEvent & { target: FabricObject }) =>
-      handleObjectMoving(canvas, event.target);
-
-  const handleObjectModifiedCallback = (canvas: Canvas) => () => clearGuidelines(canvas);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -27,9 +21,6 @@ export default function CanvasBase() {
     fabricCanvas.on("object:added", (event) => {
       const obj = event.target;
 
-      if (!obj) return;
-      if (isGuidelineObject(obj)) return;
-
       obj.name = obj.name ?? `New ${obj.type}`;
       obj.id = obj.id || `${obj.type}_${new Date().getTime()}`;
 
@@ -37,12 +28,9 @@ export default function CanvasBase() {
       addElement(obj);
     });
 
-    fabricCanvas.on("object:moving", handleObjectMovingCallback(fabricCanvas));
-    fabricCanvas.on("object:modified", handleObjectModifiedCallback(fabricCanvas));
+    initAligningGuidelines(fabricCanvas, {});
 
     return () => {
-      fabricCanvas.off("object:modified", handleObjectModifiedCallback(fabricCanvas));
-      fabricCanvas.off("object:moving", handleObjectMovingCallback(fabricCanvas));
       fabricCanvas.dispose();
       setCanvas(null);
     };
