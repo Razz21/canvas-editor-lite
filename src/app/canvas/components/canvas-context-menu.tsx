@@ -95,7 +95,7 @@ function CanvasContextMenu({ children }: CanvasContextMenuProps) {
       <ContextMenuContent className="w-64">
         <ContextMenuItem inset disabled={!selected} onClick={bringToFront}>
           Bring to Front
-          <ContextMenuShortcut>Ctrl + ]</ContextMenuShortcut>
+          <ContextMenuShortcut>ctrl + ]</ContextMenuShortcut>
         </ContextMenuItem>
         <ContextMenuItem inset disabled={!selected} onClick={sendToBack}>
           Send to Back
@@ -106,7 +106,7 @@ function CanvasContextMenu({ children }: CanvasContextMenuProps) {
 
         <ContextMenuItem inset onClick={selectAll}>
           Select All
-          <ContextMenuShortcut>Ctrl + a</ContextMenuShortcut>
+          <ContextMenuShortcut>ctrl + a</ContextMenuShortcut>
         </ContextMenuItem>
         <ContextMenuItem inset onClick={deselectAll}>
           Deselect All
@@ -117,11 +117,11 @@ function CanvasContextMenu({ children }: CanvasContextMenuProps) {
 
         <ContextMenuItem inset disabled={!isActiveSelectionObject(selected)} onClick={group}>
           Group
-          <ContextMenuShortcut>Ctrl + a</ContextMenuShortcut>
+          <ContextMenuShortcut>ctrl + g</ContextMenuShortcut>
         </ContextMenuItem>
         <ContextMenuItem inset disabled={!isGroupObject(selected)} onClick={ungroup}>
           Ungroup
-          <ContextMenuShortcut>d</ContextMenuShortcut>
+          <ContextMenuShortcut>ctrl + u</ContextMenuShortcut>
         </ContextMenuItem>
 
         <ContextMenuSeparator />
@@ -130,7 +130,7 @@ function CanvasContextMenu({ children }: CanvasContextMenuProps) {
           Duplicate
           <ContextMenuShortcut>ctrl + d</ContextMenuShortcut>
         </ContextMenuItem>
-        <ContextMenuItem inset disabled={!!selected} onClick={deleteSelected}>
+        <ContextMenuItem inset disabled={!selected} onClick={deleteSelected}>
           Delete
           <ContextMenuShortcut>del</ContextMenuShortcut>
         </ContextMenuItem>

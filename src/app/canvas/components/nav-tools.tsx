@@ -14,12 +14,14 @@ import {
   Group,
   ActiveSelection,
   Ellipse,
+  FabricImage,
 } from "fabric";
 import {
   CircleIcon,
   CopyIcon,
   CropIcon,
   GroupIcon,
+  ImageIcon,
   MousePointer2Icon,
   PencilIcon,
   SlashIcon,
@@ -87,6 +89,44 @@ function addTextBox(canvas: Canvas | null) {
   canvas.add(item);
   canvas.setActiveObject(item);
 }
+
+function addImage(canvas: Canvas | null) {
+  if (!canvas) return;
+
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+  input.multiple = false;
+  input.style.display = "none";
+  input.onchange = () => {
+    const files = Array.from(input.files || []);
+    if (files.length === 0) {
+      return;
+    }
+    const file = files[0];
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+      const image = new Image();
+      image.src = typeof e.target?.result === "string" ? e.target.result : "";
+
+      image.onload = function () {
+        const img = new FabricImage(image, {
+          left: 10,
+          top: 10,
+        });
+
+        img.scaleToWidth(200);
+        canvas.add(img);
+        canvas.setActiveObject(img);
+        canvas.requestRenderAll();
+      };
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
 const maintainStrokeWidth = (object: FabricObject) => {
   const scaleX = object.scaleX || 1;
   const scaleY = object.scaleY || 1;
@@ -510,6 +550,9 @@ const NavTools = () => {
         </Button>
         <Button onClick={() => addTextBox(canvas)} variant="ghost" size="icon">
           <TypeIcon />
+        </Button>
+        <Button onClick={() => addImage(canvas)} variant="ghost" size="icon">
+          <ImageIcon />
         </Button>
         <Button onClick={() => groupSelected(canvas)} variant="ghost" size="icon">
           <GroupIcon />

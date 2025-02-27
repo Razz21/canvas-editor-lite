@@ -18,6 +18,7 @@ import {
   CircleHelpIcon,
   SplineIcon,
   LayersIcon,
+  ImageIcon,
 } from "lucide-react";
 import { ShapeType, useCanvasStore } from "../stores/canvas-store";
 import { useElementsStore } from "../stores/elements-store";
@@ -234,8 +235,10 @@ const LAYER_ITEM_ICON_MAP = {
   rect: SquareIcon,
   line: SlashIcon,
   path: SplineIcon,
-  default: CircleHelpIcon,
   group: LayersIcon,
+  image: ImageIcon,
+  // default icon
+  default: CircleHelpIcon,
 } satisfies Partial<
   Record<Lowercase<ShapeType> | "default", ComponentType<React.SVGProps<SVGSVGElement>>>
 >;
