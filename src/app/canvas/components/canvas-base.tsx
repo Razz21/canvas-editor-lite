@@ -1,13 +1,11 @@
 import { useEffect, useRef } from "react";
 import { INIT_CANVAS_OPTIONS, useCanvasStore } from "../stores/canvas-store";
-import { useElementsStore } from "../stores/elements-store";
 import { Canvas } from "fabric";
 import { initAligningGuidelines } from "fabric/extensions";
 
 export default function CanvasBase() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const setCanvas = useCanvasStore((state) => state.setCanvas);
-  const addElement = useElementsStore((state) => state.addElement);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -19,13 +17,13 @@ export default function CanvasBase() {
     setCanvas(fabricCanvas);
 
     fabricCanvas.on("object:added", (event) => {
-      const obj = event.target;
+      // ensure object has a name and id
 
-      obj.name = obj.name ?? `New ${obj.type}`;
+      const obj = event.target;
+      obj.name = obj.name ?? obj.type;
       obj.id = obj.id || `${obj.type}_${new Date().getTime()}`;
 
       console.log("object:added", obj);
-      addElement(obj);
     });
 
     initAligningGuidelines(fabricCanvas, {});
@@ -34,11 +32,11 @@ export default function CanvasBase() {
       fabricCanvas.dispose();
       setCanvas(null);
     };
-  }, [setCanvas, addElement]);
+  }, [setCanvas]);
 
   return (
-    <div className="origin-center">
-      <canvas ref={canvasRef} className="border shadow-md border-neutral-100" />
+    <div className="origin-center border shadow-lg border-neutral-100" style={INIT_CANVAS_OPTIONS}>
+      <canvas ref={canvasRef} />
     </div>
   );
 }

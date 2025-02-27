@@ -6,7 +6,7 @@ import CanvasSettings from "./canvas-settings";
 import FloatingPanel from "./floating-panel";
 import Layers from "./layers";
 import LayerSettings from "./layer-settings";
-import CroppingSettings from "./cropping-settings";
+// import CroppingSettings from "./cropping-settings";
 import { ThemeToggle } from "@/app/components/theme-toggle";
 import CanvasZoom from "./canvas-zoom";
 import CanvasContextMenu from "./canvas-context-menu";
@@ -28,17 +28,19 @@ function CanvasApp({}: CanvasAppProps) {
             <LayerSettings />
           </FloatingPanel>
 
-          <CanvasSettings />
-          <CroppingSettings />
+          <FloatingPanel>
+            <CanvasSettings />
+          </FloatingPanel>
+          {/* <CroppingSettings /> */}
         </div>
         <CanvasZoom />
+        <div className="fixed top-4 right-4">
+          <ThemeToggle />
+        </div>
       </div>
       <CanvasContextMenu>
         <CanvasBase />
       </CanvasContextMenu>
-      <div className="fixed top-4 right-4">
-        <ThemeToggle />
-      </div>
     </div>
   );
 }
