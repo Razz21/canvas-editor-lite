@@ -15,6 +15,10 @@ declare module "fabric" {
   }
 
   interface Canvas {
+    isDragging?: boolean;
+    lastPosX?: number;
+    lastPosY?: number;
+    
     getObjectById: (id?: string | null) => FabricObject | undefined;
   }
 }

@@ -8,6 +8,7 @@ import Layers from "./layers";
 import LayerSettings from "./layer-settings";
 import CroppingSettings from "./cropping-settings";
 import { ThemeToggle } from "@/app/components/theme-toggle";
+import CanvasZoom from "./canvas-zoom";
 
 export type CanvasAppProps = {};
 
@@ -29,6 +30,7 @@ function CanvasApp({}: CanvasAppProps) {
           <CanvasSettings />
           <CroppingSettings />
         </div>
+        <CanvasZoom />
       </div>
       <CanvasBase />
       <div className="fixed top-4 right-4">

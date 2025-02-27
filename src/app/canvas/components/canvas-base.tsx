@@ -48,5 +48,9 @@ export default function CanvasBase() {
     };
   }, [setCanvas, addElement]);
 
-  return <canvas ref={canvasRef} className="border shadow-md border-neutral-100" />;
+  return (
+    <div className="origin-center">
+      <canvas ref={canvasRef} className="border shadow-md border-neutral-100" />
+    </div>
+  );
 }
