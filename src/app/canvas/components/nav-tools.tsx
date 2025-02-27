@@ -143,17 +143,17 @@ const addFrameToCanvas = (canvas: Canvas | null) => {
   });
 };
 
-function isGroupObject(object: FabricObject | Group | null | undefined): object is Group {
+export function isGroupObject(object: FabricObject | Group | null | undefined): object is Group {
   return !!object?.isType("group");
 }
 
-function isActiveSelectionObject(
+export function isActiveSelectionObject(
   object: FabricObject | Group | null | undefined
 ): object is ActiveSelection {
   return !!object?.isType("activeselection");
 }
 
-const groupSelected = (canvas: Canvas | null) => {
+export const groupSelected = (canvas: Canvas | null) => {
   const activeObject = canvas?.getActiveObject();
 
   if (!(canvas && isActiveSelectionObject(activeObject))) {
@@ -168,7 +168,7 @@ const groupSelected = (canvas: Canvas | null) => {
   canvas.requestRenderAll();
 };
 
-const unGroupSelected = (canvas: Canvas | null) => {
+export const unGroupSelected = (canvas: Canvas | null) => {
   const activeObject = canvas?.getActiveObject();
 
   if (!(canvas && isGroupObject(activeObject))) {
@@ -183,7 +183,7 @@ const unGroupSelected = (canvas: Canvas | null) => {
   canvas.requestRenderAll();
 };
 
-const cloneSelected = async (canvas: Canvas | null) => {
+export const cloneSelected = async (canvas: Canvas | null) => {
   const activeObject = canvas?.getActiveObject();
 
   if (!activeObject || !canvas) {
