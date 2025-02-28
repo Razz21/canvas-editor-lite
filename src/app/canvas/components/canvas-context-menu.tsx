@@ -11,13 +11,8 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { ActiveSelection, FabricObject } from "fabric";
-import {
-  cloneSelected,
-  groupSelected,
-  isActiveSelectionObject,
-  isGroupObject,
-  unGroupSelected,
-} from "./nav-tools";
+import { cloneSelected, groupSelected, unGroupSelected } from "./nav-tools";
+import { isActiveSelectionObject, isGroupObject } from "../utils/canvas";
 
 export type CanvasContextMenuProps = PropsWithChildren & {};
 
@@ -35,7 +30,6 @@ function CanvasContextMenu({ children }: CanvasContextMenuProps) {
         canvas.setActiveObject(opts.target);
         canvas.requestRenderAll();
       }
-      console.log("context menu", opts);
     });
   }, [canvas]);
 

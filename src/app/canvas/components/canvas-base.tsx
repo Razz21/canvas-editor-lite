@@ -35,7 +35,7 @@ export default function CanvasBase() {
   }, [setCanvas]);
 
   return (
-    <div className="origin-center border shadow-lg border-neutral-100" style={INIT_CANVAS_OPTIONS}>
+    <div className="origin-center border shadow-lg border-neutral-100">
       <canvas ref={canvasRef} />
     </div>
   );
