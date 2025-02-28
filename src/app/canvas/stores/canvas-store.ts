@@ -32,21 +32,3 @@ export const useCanvasStore = create<CanvasState>()(
     { name: "CanvasStore" }
   )
 );
-
-export const SHAPE_TYPES = {
-  CIRCLE: "Circle",
-  ELLIPSE: "Ellipse",
-  GROUP: "Group",
-  IMAGE: "Image",
-  ITEXT: "I-Text",
-  LINE: "Line",
-  PATH: "Path",
-  POLYGON: "Polygon",
-  POLYLINE: "Polyline",
-  RECT: "Rect",
-  TEXT: "Text",
-  TEXTBOX: "Textbox",
-  TRIANGLE: "Triangle",
-} as const;
-
-export type ShapeType = (typeof SHAPE_TYPES)[keyof typeof SHAPE_TYPES];

@@ -2,6 +2,17 @@ import { useEffect, useRef } from "react";
 import { INIT_CANVAS_OPTIONS, useCanvasStore } from "../stores/canvas-store";
 import { Canvas } from "fabric";
 import { initAligningGuidelines } from "fabric/extensions";
+import { cloneSelected, removeSelected } from "../utils/canvas/actions";
+
+const handleKeyEvent = (canvas: Canvas) => (e: KeyboardEvent) => {
+  if (e.key === "Delete") {
+    removeSelected(canvas);
+  } else if (e.ctrlKey && e.key === "d") {
+    e.preventDefault();
+    cloneSelected(canvas);
+    e.stopPropagation();
+  }
+};
 
 export default function CanvasBase() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -26,11 +37,15 @@ export default function CanvasBase() {
       console.log("object:added", obj);
     });
 
+    const keyDownHandler = handleKeyEvent(fabricCanvas);
+    document.addEventListener("keydown", keyDownHandler);
+
     initAligningGuidelines(fabricCanvas, {});
 
     return () => {
       fabricCanvas.dispose();
       setCanvas(null);
+      document.removeEventListener("keydown", keyDownHandler);
     };
   }, [setCanvas]);
 

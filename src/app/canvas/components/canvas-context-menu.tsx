@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/context-menu";
 import { ActiveSelection, FabricObject } from "fabric";
 import { cloneSelected, groupSelected, unGroupSelected } from "./nav-tools";
-import { isActiveSelectionObject, isGroupObject } from "../utils/canvas";
+import { isActiveSelectionObject, isGroupObject } from "../utils/canvas/common";
 
 export type CanvasContextMenuProps = PropsWithChildren & {};
 
