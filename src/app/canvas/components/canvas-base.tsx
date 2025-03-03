@@ -26,7 +26,7 @@ export default function CanvasBase() {
     fabricCanvas.renderAll();
 
     setCanvas(fabricCanvas);
-
+    // TODO: move this to a constructor
     fabricCanvas.on("object:added", (event) => {
       // ensure object has a name and id
 
@@ -40,9 +40,10 @@ export default function CanvasBase() {
     const keyDownHandler = handleKeyEvent(fabricCanvas);
     document.addEventListener("keydown", keyDownHandler);
 
-    initAligningGuidelines(fabricCanvas, {});
+    const clearAligningGuidelines = initAligningGuidelines(fabricCanvas, {});
 
     return () => {
+      clearAligningGuidelines();
       fabricCanvas.dispose();
       setCanvas(null);
       document.removeEventListener("keydown", keyDownHandler);

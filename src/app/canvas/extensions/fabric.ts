@@ -1,19 +1,20 @@
-import { Canvas } from "fabric";
+import { Canvas, FabricObject } from "fabric";
 
 declare module "fabric" {
   interface FabricObject {
     name?: string;
     id?: string;
-    zIndex?: number;
     locked?: boolean;
   }
   interface FabricObjectProps {
     name?: string;
     id?: string;
-    zIndex?: number;
     locked?: boolean;
   }
-
+  interface SerializedObjectProps {
+    id?: string;
+    name?: string;
+  }
   interface Canvas {
     isDragging?: boolean;
     lastPosX?: number;
@@ -28,3 +29,5 @@ Canvas.prototype.getObjectById = function (id) {
 
   return this.getObjects().find((object) => object.id === id);
 };
+
+FabricObject.customProperties = ["name", "id"];
