@@ -46,6 +46,7 @@ export const cloneSelected = async (canvas: Canvas | null) => {
     top: activeObject.top + 10,
     evented: true,
   });
+  cloned.id = `${activeObject.id}_copy`;
 
   if (cloned instanceof ActiveSelection) {
     // active selection needs a reference to the canvas.
@@ -60,8 +61,8 @@ export const cloneSelected = async (canvas: Canvas | null) => {
     canvas.add(cloned);
   }
 
-  canvas?.setActiveObject(cloned);
-  canvas?.requestRenderAll();
+  canvas.setActiveObject(cloned);
+  canvas.requestRenderAll();
 };
 
 export const removeSelected = (canvas: Canvas | null) => {
@@ -80,7 +81,7 @@ export const removeSelected = (canvas: Canvas | null) => {
     });
   }
   canvas.remove(activeObject);
-  canvas?.discardActiveObject();
+  canvas.discardActiveObject();
 
-  canvas?.requestRenderAll();
+  canvas.requestRenderAll();
 };

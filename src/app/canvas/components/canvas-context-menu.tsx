@@ -11,8 +11,8 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { ActiveSelection, FabricObject } from "fabric";
-import { cloneSelected, groupSelected, unGroupSelected } from "./nav-tools";
 import { isActiveSelectionObject, isGroupObject } from "../utils/canvas/common";
+import { cloneSelected, groupSelected, unGroupSelected } from "../utils/canvas/actions";
 
 export type CanvasContextMenuProps = PropsWithChildren & {};
 
