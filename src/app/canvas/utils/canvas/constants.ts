@@ -15,3 +15,5 @@ export const SHAPE_TYPES = {
 } as const;
 
 export type ShapeType = (typeof SHAPE_TYPES)[keyof typeof SHAPE_TYPES];
+
+export type AlignmentDirection = "left" | "right" | "top" | "bottom" | "horizontal" | "vertical";

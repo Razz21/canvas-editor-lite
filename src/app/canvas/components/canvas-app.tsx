@@ -20,13 +20,11 @@ function CanvasApp({}: CanvasAppProps) {
         <FloatingPanel className="fixed left-1/2 -translate-x-1/2 top-4">
           <NavTools />
         </FloatingPanel>
-        <FloatingPanel className="fixed left-4 top-1/2 -translate-y-1/2">
+        <FloatingPanel className="fixed left-4 top-20">
           <Layers />
         </FloatingPanel>
-        <div className="fixed top-1/2 -translate-y-1/2 right-4 flex flex-col gap-2">
-          <FloatingPanel>
-            <LayerSettings />
-          </FloatingPanel>
+        <div className="fixed top-20 right-4 flex flex-col gap-2">
+          <LayerSettings />
 
           <FloatingPanel>
             <CanvasSettings />
