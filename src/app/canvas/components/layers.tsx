@@ -28,6 +28,7 @@ import { clamp } from "../utils/numbers";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Toggle } from "@/components/ui/toggle";
 import { ShapeType } from "../utils/canvas/constants";
+import Panel from "./panel";
 
 export type LayerProps = {};
 
@@ -186,28 +187,34 @@ function Layers({}: LayerProps) {
   }, [canvas]);
 
   return (
-    <div className="space-y-2 w-72">
-      <div className="flex justify-between items-center p-2">
-        <span>Layers</span>
-        <span className="flex gap-1">
-          <Button
-            onClick={() => moveLayers(1)}
-            size="icon"
-            variant="ghost"
-            disabled={!selectedLayers.length}
-          >
-            <ChevronUpIcon />
-          </Button>
-          <Button
-            onClick={() => moveLayers(-1)}
-            size="icon"
-            variant="ghost"
-            disabled={!selectedLayers.length}
-          >
-            <ChevronDownIcon />
-          </Button>
-        </span>
-      </div>
+    <Panel
+      header={
+        <>
+          <span>Layers</span>
+          <span className="flex gap-1">
+            <Button
+              onClick={() => moveLayers(1)}
+              size="icon"
+              variant="outline"
+              disabled={!selectedLayers.length}
+              className="w-8 h-8"
+            >
+              <ChevronUpIcon />
+            </Button>
+            <Button
+              onClick={() => moveLayers(-1)}
+              size="icon"
+              variant="outline"
+              disabled={!selectedLayers.length}
+              className="w-8 h-8"
+            >
+              <ChevronDownIcon />
+            </Button>
+          </span>
+        </>
+      }
+      className="w-72 fixed top-20 left-4"
+    >
       <Separator />
       <ScrollArea className="h-[40vh] p-2">
         <LayerTree
@@ -219,7 +226,7 @@ function Layers({}: LayerProps) {
           selectLayerInCanvas={selectLayerInCanvas}
         />
       </ScrollArea>
-    </div>
+    </Panel>
   );
 }
 
