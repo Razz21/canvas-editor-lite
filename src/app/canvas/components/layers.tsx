@@ -4,8 +4,6 @@ import { Button } from "@/components/ui/button";
 import { FabricObject, Group } from "fabric";
 import { ComponentProps, ComponentType, useCallback, useEffect, useState } from "react";
 import {
-  ArrowUpIcon,
-  ArrowDownIcon,
   EyeIcon,
   TrashIcon,
   LockIcon,
@@ -19,14 +17,17 @@ import {
   SplineIcon,
   LayersIcon,
   ImageIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
 } from "lucide-react";
-import { ShapeType, useCanvasStore } from "../stores/canvas-store";
+import { useCanvasStore } from "../stores/canvas-store";
 import { useElementsStore } from "../stores/elements-store";
 import { useShallow } from "zustand/react/shallow";
 import { Separator } from "@/components/ui/separator";
 import { clamp } from "../utils/numbers";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Toggle } from "@/components/ui/toggle";
+import { ShapeType } from "../utils/canvas/constants";
 
 export type LayerProps = {};
 
@@ -126,11 +127,6 @@ function Layers({}: LayerProps) {
     const objects = canvas.getObjects();
     const filteredObjects = objects.filter((obj) => !isObjectInGroup(obj));
 
-    // TODO: validate if zIndex is required
-    filteredObjects.forEach((object, index) => {
-      object.zIndex = index;
-    });
-
     setElements([...filteredObjects].reverse());
     canvas.requestRenderAll();
   };
@@ -190,25 +186,25 @@ function Layers({}: LayerProps) {
   }, [canvas]);
 
   return (
-    <div className="bg-background rounded shadow-md space-y-2 w-72">
+    <div className="space-y-2 w-72">
       <div className="flex justify-between items-center p-2">
         <span>Layers</span>
         <span className="flex gap-1">
           <Button
             onClick={() => moveLayers(1)}
             size="icon"
+            variant="ghost"
             disabled={!selectedLayers.length}
-            className="[&_svg]:size-3 w-8 h-8"
           >
-            <ArrowUpIcon />
+            <ChevronUpIcon />
           </Button>
           <Button
             onClick={() => moveLayers(-1)}
             size="icon"
+            variant="ghost"
             disabled={!selectedLayers.length}
-            className="[&_svg]:size-3 w-8 h-8"
           >
-            <ArrowDownIcon />
+            <ChevronDownIcon />
           </Button>
         </span>
       </div>
@@ -231,6 +227,7 @@ export default Layers;
 
 const LAYER_ITEM_ICON_MAP = {
   circle: CircleIcon,
+  ellipse: CircleIcon,
   textbox: TypeIcon,
   rect: SquareIcon,
   line: SlashIcon,
