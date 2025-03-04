@@ -1,6 +1,6 @@
 "use client;";
 
-import { ComponentProps, ComponentType, ReactNode, SVGProps } from "react";
+import { ComponentProps, ComponentType, ReactNode, SVGProps, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Color } from "fabric";
 
 export type ControlLabelProps = { label: ReactNode } & Omit<ComponentProps<"div">, "onChange">;
 
@@ -88,18 +89,52 @@ export type ControlColorProps = {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;
+  withAlpha?: boolean;
 } & ControlLabelProps;
 
-export function ControlColor({ value, onChange, disabled, ...rest }: ControlColorProps) {
+export function ControlColor({ value, onChange, withAlpha, disabled, ...rest }: ControlColorProps) {
+  const [color, setColor] = useState({ hex: "#000000", alpha: 0 });
+
+  useEffect(() => {
+    if (!value) return;
+
+    const fabricColor = new Color(value);
+    setColor({
+      hex: `#${fabricColor.toHex()}`,
+      alpha: fabricColor.getAlpha() ?? 1,
+    });
+  }, [value]);
+
+  const updateColor = (updates: Partial<typeof color>) => {
+    const newState = { ...color, ...updates };
+    setColor(newState);
+    const rgbaColor = new Color(newState.hex).setAlpha(newState.alpha).toRgba();
+    onChange(rgbaColor);
+  };
+
   return (
     <ControlLabel {...rest}>
-      <input
-        type="color"
-        className="block w-8 h-8 rounded-full border-[6px] border-muted"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
-      />
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          className="block w-8 h-8 rounded-full border-[6px] border-muted"
+          value={color.hex}
+          onChange={(e) => updateColor({ hex: e.target.value.trim() })}
+          disabled={disabled}
+        />
+        {withAlpha ? (
+          <Slider
+            value={[color.alpha]}
+            max={1}
+            min={0}
+            step={0.01}
+            className="flex-1"
+            size="sm"
+            disabled={disabled}
+            onValueChange={(values) => updateColor({ alpha: values[0] })}
+          />
+        ) : null}
+      </div>
     </ControlLabel>
   );
 }

@@ -16,6 +16,7 @@ function StrokeControls({ handleValueChange, properties }: StrokeControlsProps) 
           label="Color"
           value={properties.stroke?.toString() ?? "#000000"}
           onChange={handleValueChange("stroke")}
+          withAlpha
         />
         <Controls.ControlInput
           label="Width"

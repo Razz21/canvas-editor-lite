@@ -97,9 +97,9 @@ function LayerSettings({}: LayerSettingsProps) {
     if (!selectedObject || !canvas) return;
 
     if (isGroupOrSelectionObject(selectedObject)) {
-      selectedObject.getObjects().forEach((object) => object.set(property).setCoords());
+      selectedObject.getObjects().forEach((object) => object.set(property, value).setCoords());
     } else {
-      selectedObject.set(property).setCoords();
+      selectedObject.set(property, value).setCoords();
     }
     canvas.requestRenderAll();
   };

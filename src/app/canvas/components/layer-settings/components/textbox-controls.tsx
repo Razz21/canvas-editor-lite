@@ -54,11 +54,13 @@ function TextBoxControls({ handleValueChange, properties }: TextBoxControlsProps
           label="Color"
           value={properties.fill?.toString() ?? "#000000"}
           onChange={handleValueChange("fill")}
+          withAlpha
         />
         <Controls.ControlColor
           label="Background"
           value={properties.backgroundColor?.toString() ?? "#000000"}
           onChange={handleValueChange("backgroundColor")}
+          withAlpha
         />
         <Controls.ControlSelect
           label="Font"

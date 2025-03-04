@@ -16,6 +16,7 @@ function FillControls({ handleValueChange, properties }: FillControlsProps) {
           label="Color"
           value={properties.fill?.toString() ?? "#000000"}
           onChange={handleValueChange("fill")}
+          withAlpha
         />
       </Controls.ControlGrid>
     </Controls.ControlGroup>
