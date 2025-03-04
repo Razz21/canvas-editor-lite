@@ -191,7 +191,7 @@ function LayerSettings({}: LayerSettingsProps) {
   };
 
   return (
-    <Panel title="Layer Settings" className="w-72">
+    <Panel title="Layer Settings" className="w-72 fixed top-20 right-4">
       <ScrollArea className="flex flex-col max-h-[60vh] overflow-y-auto">
         <div className="p-4">
           <PositionControls
