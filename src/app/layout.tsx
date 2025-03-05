@@ -18,8 +18,8 @@ const fontMono = Open_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Canvas",
-  description: "Canvas app",
+  title: "Canvas Editor Lite",
+  description: "Canvas Canvas Editor Lite App",
 };
 const availableThemes = themes.map((theme) => theme.id);
 
