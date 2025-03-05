@@ -318,8 +318,6 @@ const NavTools = () => {
                 <DropdownMenuItem onClick={() => exportAsImage("webp", 2)}>
                   as WEBP 2x
                 </DropdownMenuItem>
-                <DropdownMenuItem disabled>as SVG</DropdownMenuItem>
-                <DropdownMenuItem disabled>as PDF</DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
