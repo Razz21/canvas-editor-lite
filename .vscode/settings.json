@@ -13,5 +13,8 @@
   "eslint.workingDirectories": [{ "mode": "auto" }],
   "files.associations": {
     "*.css": "tailwindcss"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always"
   }
 }
