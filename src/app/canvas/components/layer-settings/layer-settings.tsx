@@ -1,7 +1,7 @@
 "use client;";
 
 import { Circle, Ellipse, FabricObject, Group, Rect, Textbox } from "fabric";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useCanvasStore } from "../../stores/canvas-store";
 
 import { Separator } from "@/components/ui/separator";
@@ -22,7 +22,6 @@ import { AlignmentDirection } from "../../utils/canvas/constants";
 type ShapeProps = FabricObject & Circle & Ellipse & Rect & Textbox & Group;
 
 const initProperties = {
-  // Common
   width: 0,
   height: 0,
   angle: 0,
@@ -43,78 +42,52 @@ function LayerSettings({}: LayerSettingsProps) {
     ...initProperties,
   });
 
-  useEffect(() => {
-    if (canvas) {
-      canvas.on("selection:created", (event) => {
-        // console.log("selection created", event);
-        handleObjectSelection(event.selected[0]);
-      });
-      canvas.on("selection:updated", (event) => {
-        // console.log("selection updated", event);
-        handleObjectSelection(event.selected[0]);
-      });
-      canvas.on("selection:cleared", (event) => {
-        // console.log("selection cleared", event);
-        setSelectedObject(null);
-      });
+  const rafId = useRef<number | null>(null);
+  const latestUpdates = useRef<Record<string, unknown>>({});
 
-      canvas.on("object:modified", (event) => {
-        handleObjectSelection(event.target);
-      });
-      canvas.on("object:rotating", (event) => {
-        handleObjectSelection(event.target);
-      });
-      canvas.on("object:scaling", (event) => {
-        handleObjectSelection(event.target);
-      });
-    }
-    return () => {
-      // TODO: remove listeners
-    };
-  }, [canvas]);
-
-  const handleObjectSelection = (object?: FabricObject) => {
-    // const object = canvas?.getActiveObject();
-
-    setSelectedObject(object ?? null);
-
-    if (!object) return;
-
-    setProperties({
-      ...object,
-      width: Math.round(object.width * object.scaleX),
-      height: Math.round(object.height * object.scaleY),
-      opacity: parseFloat(object.opacity.toFixed(2)),
-      left: Math.round(object.left),
-      top: Math.round(object.top),
-      angle: Math.round(object.angle),
-    });
-  };
-
-  const handleValueChange = (property: keyof typeof properties) => (value: unknown) => {
-    setProperties((prev) => ({ ...prev, [property]: value }));
-
-    if (!selectedObject || !canvas) return;
-
+  const applyCanvasUpdates = useCallback(() => {
     if (isGroupOrSelectionObject(selectedObject)) {
-      selectedObject.getObjects().forEach((object) => object.set(property, value).setCoords());
+      selectedObject
+        .getObjects()
+        .forEach((object) => object.set(latestUpdates.current).setCoords());
     } else {
-      selectedObject.set(property, value).setCoords();
+      selectedObject?.set(latestUpdates.current).setCoords();
     }
-    canvas.requestRenderAll();
-  };
+
+    canvas?.requestRenderAll();
+
+    rafId.current = null;
+    latestUpdates.current = {};
+  }, [canvas, selectedObject]);
+
+  const handleValueChange = useCallback(
+    (property: keyof typeof properties) => (value: unknown) => {
+      // Store changes in a ref to batch updates
+      latestUpdates.current[property] = value;
+
+      if (rafId.current) return;
+
+      setProperties((prev) => ({
+        ...prev,
+        ...latestUpdates.current,
+      }));
+
+      rafId.current = requestAnimationFrame(applyCanvasUpdates);
+    },
+    [applyCanvasUpdates]
+  );
 
   const handleAngleChange = (input: number) => {
+    // This method is used to rotate object on it's central rotation point,
+    // regardless of the object's origin point
+
     const value = input % 360;
 
     setProperties((prev) => ({ ...prev, angle: value }));
 
-    if (selectedObject) {
-      // This is required to rotate object on it's central rotation
-      selectedObject.rotate(value);
-      selectedObject.setCoords();
-      canvas?.requestRenderAll();
-    }
+    selectedObject?.rotate(value);
+    selectedObject?.setCoords();
+    canvas?.requestRenderAll();
   };
 
   const alignObject = (direction: AlignmentDirection) => {
@@ -189,6 +162,54 @@ function LayerSettings({}: LayerSettingsProps) {
 
     canvas.requestRenderAll();
   };
+  const handleObjectSelection = useCallback((object?: FabricObject | null) => {
+    setSelectedObject(object ?? null);
+
+    if (!object) return;
+
+    setProperties({
+      ...object?.toDatalessObject(),
+      width: Math.round(object.width * object.scaleX),
+      height: Math.round(object.height * object.scaleY),
+      opacity: parseFloat(object.opacity.toFixed(2)),
+      left: Math.round(object.left),
+      top: Math.round(object.top),
+      angle: Math.round(object.angle),
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!canvas) return;
+
+    const handleSelection = <TEvent extends { selected: FabricObject[] }>(event: TEvent) => {
+      handleObjectSelection(event.selected[0]);
+    };
+    const handleSelectionRemoved = () => {
+      handleObjectSelection(null);
+    };
+
+    const handleObjectModified = <TEvent extends { target: FabricObject }>(event: TEvent) => {
+      handleObjectSelection(event.target);
+    };
+
+    canvas.on("selection:created", handleSelection);
+    canvas.on("selection:updated", handleSelection);
+    canvas.on("selection:cleared", handleSelectionRemoved);
+
+    canvas.on("object:modified", handleObjectModified);
+    canvas.on("object:rotating", handleObjectModified);
+    canvas.on("object:scaling", handleObjectModified);
+
+    return () => {
+      canvas.off("selection:created", handleSelection);
+      canvas.off("selection:updated", handleSelection);
+      canvas.off("selection:cleared", handleSelectionRemoved);
+
+      canvas.off("object:modified", handleObjectModified);
+      canvas.off("object:rotating", handleObjectModified);
+      canvas.off("object:scaling", handleObjectModified);
+    };
+  }, [canvas, handleObjectSelection]);
 
   return (
     <Panel header="Layer Settings" className="w-72 fixed top-20 right-4">
