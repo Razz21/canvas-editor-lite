@@ -7,11 +7,11 @@ export type PanelProps = { header?: ReactNode } & ComponentProps<"div">;
 function Panel({ header, children, className, ...rest }: PanelProps) {
   return (
     <div
-      className={cn("bg-background border-2 border-muted rounded-md overflow-hidden", className)}
+      className={cn("bg-background border-2 border-muted rounded-md overflow-hidden shadow-md", className)}
       {...rest}
     >
       {header && (
-        <div className="text-base p-4 bg-muted flex items-center justify-between h-14">
+        <div className="text-base p-4 bg-muted flex items-center justify-between h-10">
           {header}
         </div>
       )}
