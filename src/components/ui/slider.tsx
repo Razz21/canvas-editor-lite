@@ -6,7 +6,7 @@ import * as SliderPrimitive from "@radix-ui/react-slider";
 import { cn } from "@/lib/utils";
 import { cva, VariantProps } from "class-variance-authority";
 
-const sliderTrackVariants = cva("relative w-full grow overflow-hidden rounded-full bg-primary/20", {
+const sliderTrackVariants = cva("relative w-full grow overflow-hidden rounded-full bg-accent", {
   variants: {
     size: {
       sm: "h-0.5",
