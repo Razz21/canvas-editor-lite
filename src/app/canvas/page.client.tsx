@@ -1,7 +1,6 @@
 "use client";
 
 import CanvasApp from "./components/canvas-app";
-import "./extensions/fabric";
 
 export default function PageClient({}) {
   return (
