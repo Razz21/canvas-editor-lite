@@ -1,7 +1,7 @@
 "use client;";
 
-import { RotateCcwIcon } from "lucide-react";
 import { FabricObject } from "fabric";
+import { RotateCcwIcon } from "lucide-react";
 
 import * as Controls from "./controls";
 

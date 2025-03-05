@@ -1,10 +1,12 @@
 "use client;";
 
-import { Textarea } from "@/components/ui/textarea";
-import * as Controls from "./controls";
 import { Textbox } from "fabric";
-import { Toggle } from "@/components/ui/toggle";
 import { ItalicIcon, StrikethroughIcon, UnderlineIcon } from "lucide-react";
+
+import * as Controls from "./controls";
+import { Textarea } from "@/components/ui/textarea";
+import { Toggle } from "@/components/ui/toggle";
+
 
 export type TextBoxControlsProps = {
   properties: Partial<Textbox>;

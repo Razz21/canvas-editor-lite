@@ -9,9 +9,10 @@ import {
   RectProps,
   Textbox,
 } from "fabric";
-import type { ShapeType } from "./constants";
 import { EllipseProps } from "fabric";
 import { TextboxProps } from "fabric";
+
+import type { ShapeType } from "./constants";
 
 export const defaultShapeOptions = {
   fill: "transparent",

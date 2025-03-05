@@ -1,8 +1,8 @@
 "use client;";
 
-import { Button } from "@/components/ui/button";
-import { FabricObject, Group } from "fabric";
 import { ComponentProps, ComponentType, useCallback, useEffect, useState } from "react";
+
+import { FabricObject, Group } from "fabric";
 import {
   EyeIcon,
   TrashIcon,
@@ -20,16 +20,18 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
 } from "lucide-react";
+import { useShallow } from "zustand/react/shallow";
+
+import Panel from "./panel";
 import { useCanvasStore } from "../stores/canvas-store";
 import { useElementsStore } from "../stores/elements-store";
-import { useShallow } from "zustand/react/shallow";
-import { Separator } from "@/components/ui/separator";
-import { clamp } from "../utils/numbers";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Toggle } from "@/components/ui/toggle";
-import { ShapeType } from "../utils/canvas/constants";
-import Panel from "./panel";
 import { isGroupObject } from "../utils/canvas/common";
+import { ShapeType } from "../utils/canvas/constants";
+import { clamp } from "../utils/numbers";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { Toggle } from "@/components/ui/toggle";
 
 export type LayerProps = {};
 

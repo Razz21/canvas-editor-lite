@@ -1,12 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { Canvas, CanvasOptions } from "fabric";
-import { Button } from "@/components/ui/button";
+import { SettingsIcon } from "lucide-react";
+
 import { INIT_CANVAS_OPTIONS, useCanvasStore } from "../stores/canvas-store";
 import * as Controls from "./layer-settings/components/controls";
+import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { SettingsIcon } from "lucide-react";
+
 
 export type CanvasSettingsPanelProps = {};
 

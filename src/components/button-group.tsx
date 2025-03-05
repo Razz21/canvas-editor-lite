@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
+
 import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
+import { VariantProps } from "class-variance-authority";
 
 import { cn } from "../lib/utils";
 import { toggleVariants } from "./ui/toggle";
-import { VariantProps } from "class-variance-authority";
 
 const ButtonGroupContext = React.createContext<VariantProps<typeof toggleVariants>>({
   size: "default",

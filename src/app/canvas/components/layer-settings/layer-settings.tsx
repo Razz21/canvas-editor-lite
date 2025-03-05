@@ -1,23 +1,23 @@
 "use client;";
 
-import { Circle, Ellipse, FabricObject, Group, Rect, Textbox } from "fabric";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+import { Circle, Ellipse, FabricObject, Group, Rect, Textbox } from "fabric";
+
 import { useCanvasStore } from "../../stores/canvas-store";
-
-import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
-
 import Panel from "../panel";
-import * as Controls from "./components/controls";
-import TextBoxControls from "./components/textbox-controls";
-import EllipseControls from "./components/ellipse-controls";
+import { AlignmentControl } from "./components/alignment-controls";
 import CircleControls from "./components/circle-controls";
-import StrokeControls from "./components/stroke-controls";
+import * as Controls from "./components/controls";
+import EllipseControls from "./components/ellipse-controls";
 import FillControls from "./components/fill-controls";
 import PositionControls from "./components/position-controls";
+import StrokeControls from "./components/stroke-controls";
+import TextBoxControls from "./components/textbox-controls";
 import { getBoundingBox, isGroupOrSelectionObject } from "../../utils/canvas/common";
-import { AlignmentControl } from "./components/alignment-controls";
 import { AlignmentDirection } from "../../utils/canvas/constants";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 
 type ShapeProps = FabricObject & Circle & Ellipse & Rect & Textbox & Group;
 

@@ -1,8 +1,9 @@
-import { useHotkeys } from "react-hotkeys-hook";
-import * as actions from "../utils/canvas/actions";
-import { useCanvasStore } from "../stores/canvas-store";
 import { Canvas } from "fabric";
 import { keyBy } from "lodash-es";
+import { useHotkeys } from "react-hotkeys-hook";
+
+import { useCanvasStore } from "../stores/canvas-store";
+import * as actions from "../utils/canvas/actions";
 
 type HotkeyAction = {
   hotkey: string;

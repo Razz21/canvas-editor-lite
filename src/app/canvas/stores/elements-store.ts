@@ -1,6 +1,6 @@
-import { create } from "zustand";
-import { produce } from "immer";
 import { FabricObject } from "fabric";
+import { produce } from "immer";
+import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
 export type ElementType = "Rect" | "Circle" | "Textbox";

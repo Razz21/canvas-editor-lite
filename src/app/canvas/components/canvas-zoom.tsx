@@ -1,14 +1,16 @@
 "use client";
 
 import { ChangeEvent, useEffect, useState, Dispatch, SetStateAction } from "react";
-import { useCanvasStore } from "../stores/canvas-store";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { RotateCcwIcon, ZoomInIcon, ZoomOutIcon } from "lucide-react";
-import { clamp } from "../utils/numbers";
+
 import { Canvas, Point, TPointerEventInfo } from "fabric";
 import { debounce } from "lodash-es";
+import { RotateCcwIcon, ZoomInIcon, ZoomOutIcon } from "lucide-react";
+
 import Panel from "./panel";
+import { useCanvasStore } from "../stores/canvas-store";
+import { clamp } from "../utils/numbers";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 5;

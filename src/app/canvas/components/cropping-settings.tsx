@@ -1,5 +1,12 @@
 "use client;";
 
+import { useEffect, useState } from "react";
+
+import { FabricObject } from "fabric";
+import { DownloadIcon } from "lucide-react";
+
+import { useCanvasStore } from "../stores/canvas-store";
+import { useElementsStore } from "../stores/elements-store";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -8,11 +15,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FabricObject } from "fabric";
-import { DownloadIcon } from "lucide-react";
-import { useEffect, useState } from "react";
-import { useCanvasStore } from "../stores/canvas-store";
-import { useElementsStore } from "../stores/elements-store";
 
 export type CroppingSettingsProps = {};
 

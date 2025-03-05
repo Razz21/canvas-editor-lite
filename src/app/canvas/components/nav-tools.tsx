@@ -1,6 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+
 import {
   Canvas,
   FabricObject,
@@ -25,10 +26,17 @@ import {
   TypeIcon,
   UngroupIcon,
 } from "lucide-react";
+
+import Panel from "./panel";
 import { useCanvasStore } from "../stores/canvas-store";
-import { useEffect, useState } from "react";
-import { Separator } from "@/components/ui/separator";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  cloneSelected,
+  groupSelected,
+  removeSelected,
+  ungroupSelected,
+} from "../utils/canvas/actions";
+import { objectFactory } from "../utils/canvas/object-factory";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,14 +48,8 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { objectFactory } from "../utils/canvas/object-factory";
-import {
-  cloneSelected,
-  groupSelected,
-  removeSelected,
-  ungroupSelected,
-} from "../utils/canvas/actions";
-import Panel from "./panel";
+import { Separator } from "@/components/ui/separator";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 function addRectangle(canvas: Canvas | null) {
   if (!canvas) return;

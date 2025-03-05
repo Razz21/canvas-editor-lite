@@ -1,6 +1,8 @@
 "use client;";
 
 import { PropsWithChildren, useEffect } from "react";
+
+import { HOTKEY_ACTIONS } from "../hooks/useCanvasHotkeys";
 import { useCanvasStore } from "../stores/canvas-store";
 import {
   ContextMenu,
@@ -11,7 +13,6 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 
-import { HOTKEY_ACTIONS } from "../hooks/useCanvasHotkeys";
 
 const contextMenuItems = [
   HOTKEY_ACTIONS.BRING_TO_FRONT,

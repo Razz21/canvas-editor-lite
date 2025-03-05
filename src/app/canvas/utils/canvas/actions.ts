@@ -1,4 +1,5 @@
 import { ActiveSelection, Canvas, Group } from "fabric";
+
 import { isActiveSelectionObject, isGroupObject } from "./common";
 
 export const groupSelected = (canvas: Canvas | null) => {

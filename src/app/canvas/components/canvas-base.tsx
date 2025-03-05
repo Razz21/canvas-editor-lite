@@ -1,8 +1,10 @@
 import { useEffect, useRef } from "react";
-import { INIT_CANVAS_OPTIONS, useCanvasStore } from "../stores/canvas-store";
+
 import { Canvas, FabricObject } from "fabric";
 import { initAligningGuidelines } from "fabric/extensions";
+
 import { useCanvasHotkeys } from "../hooks/useCanvasHotkeys";
+import { INIT_CANVAS_OPTIONS, useCanvasStore } from "../stores/canvas-store";
 
 export default function CanvasBase() {
   const canvasRef = useRef<HTMLCanvasElement>(null);

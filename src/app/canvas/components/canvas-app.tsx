@@ -1,14 +1,14 @@
 "use client;";
 
-import NavTools from "./nav-tools";
 import CanvasBase from "./canvas-base";
-import CanvasSettings from "./canvas-settings";
-import Layers from "./layers";
-import LayerSettings from "./layer-settings";
-// import CroppingSettings from "./cropping-settings";
-import { ThemeToggle } from "@/app/components/theme-toggle";
-import CanvasZoom from "./canvas-zoom";
 import CanvasContextMenu from "./canvas-context-menu";
+import CanvasSettings from "./canvas-settings";
+import CanvasZoom from "./canvas-zoom";
+// import CroppingSettings from "./cropping-settings";
+import LayerSettings from "./layer-settings";
+import Layers from "./layers";
+import NavTools from "./nav-tools";
+import { ThemeToggle } from "@/app/components/theme-toggle";
 
 export type CanvasAppProps = {};
 
