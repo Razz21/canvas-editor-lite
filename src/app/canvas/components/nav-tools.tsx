@@ -45,7 +45,7 @@ import {
   cloneSelected,
   groupSelected,
   removeSelected,
-  unGroupSelected,
+  ungroupSelected,
 } from "../utils/canvas/actions";
 
 function addRectangle(canvas: Canvas | null) {
@@ -368,7 +368,7 @@ const NavTools = () => {
       <Button onClick={() => groupSelected(canvas)} variant="ghost" size="icon">
         <GroupIcon />
       </Button>
-      <Button onClick={() => unGroupSelected(canvas)} variant="ghost" size="icon">
+      <Button onClick={() => ungroupSelected(canvas)} variant="ghost" size="icon">
         <UngroupIcon />
       </Button>
       <Button onClick={() => cloneSelected(canvas)} variant="ghost" size="icon">
