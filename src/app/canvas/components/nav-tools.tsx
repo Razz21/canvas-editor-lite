@@ -1,6 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+
 import {
   Canvas,
   FabricObject,
@@ -10,6 +11,7 @@ import {
   FabricImage,
   Shadow,
   Point,
+  ImageFormat,
 } from "fabric";
 import {
   CircleIcon,
@@ -24,10 +26,17 @@ import {
   TypeIcon,
   UngroupIcon,
 } from "lucide-react";
-import { useCanvasStore } from "../stores/canvas-store";
-import { useEffect, useState } from "react";
-import { Separator } from "@/components/ui/separator";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
+import Panel from "./panel";
+import { useCanvas } from "../hooks/useCanvas";
+import {
+  cloneSelected,
+  groupSelected,
+  removeSelected,
+  ungroupSelected,
+} from "../utils/canvas/actions";
+import { objectFactory } from "../utils/canvas/object-factory";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -39,13 +48,8 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { objectFactory } from "../utils/canvas/object-factory";
-import {
-  cloneSelected,
-  groupSelected,
-  removeSelected,
-  unGroupSelected,
-} from "../utils/canvas/actions";
+import { Separator } from "@/components/ui/separator";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 function addRectangle(canvas: Canvas | null) {
   if (!canvas) return;
@@ -76,6 +80,7 @@ function addTextBox(canvas: Canvas | null) {
   const item = objectFactory("textbox", {
     left: 10,
     top: 10,
+    strokeWidth: 0,
   });
   canvas.add(item);
   canvas.setActiveObject(item);
@@ -117,6 +122,26 @@ function addImage(canvas: Canvas | null) {
   input.click();
 }
 
+const exportCanvasAsImage =
+  (canvas: Canvas | null) =>
+  (format: ImageFormat, multiplier: 1 | 2 = 1) => {
+    if (!canvas) return;
+    const fileName = "canvas";
+
+    const dataURL = canvas.toDataURL({
+      multiplier,
+      format,
+      quality: 1,
+    });
+
+    if (!dataURL) return;
+
+    const link = document.createElement("a");
+    link.href = dataURL;
+    link.download = [fileName, format].join(".");
+    link.click();
+  };
+
 const DRAW_SHAPES = {
   ELLIPSE: "ellipse",
   RECTANGLE: "rect",
@@ -128,44 +153,44 @@ const DRAW_SHAPES = {
 type DrawShapes = (typeof DRAW_SHAPES)[keyof typeof DRAW_SHAPES];
 
 const NavTools = () => {
-  const canvas = useCanvasStore((state) => state.canvas);
+  const [canvas] = useCanvas();
 
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
-  const [shape, setShape] = useState<FabricObject | null>(null);
-  const [shapeType, setShapeType] = useState<DrawShapes>(DRAW_SHAPES.SELECT);
+  const [drawShape, setDrawShape] = useState<FabricObject | null>(null);
+  const [drawShapeType, setDrawShapeType] = useState<DrawShapes>(DRAW_SHAPES.SELECT);
   const [origin, setOrigin] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const handleMouseMoveDrawEllipse = (pointer: Point) => {
-    shape?.set({
+    drawShape?.set({
       rx: Math.abs(origin.x - pointer.x) / 2,
       ry: Math.abs(origin.y - pointer.y) / 2,
     });
     if (origin.x > pointer.x) {
-      shape?.set({ left: pointer.x });
+      drawShape?.set({ left: pointer.x });
     }
     if (origin.y > pointer.y) {
-      shape?.set({ top: pointer.y });
+      drawShape?.set({ top: pointer.y });
     }
   };
   const handleMouseMoveDrawRect = (pointer: Point) => {
-    shape?.set({
+    drawShape?.set({
       width: Math.abs(origin.x - pointer.x),
       height: Math.abs(origin.y - pointer.y),
     });
     if (origin.x > pointer.x) {
-      shape?.set({ left: pointer.x });
+      drawShape?.set({ left: pointer.x });
     }
     if (origin.y > pointer.y) {
-      shape?.set({ top: pointer.y });
+      drawShape?.set({ top: pointer.y });
     }
   };
   const handleMouseMoveDrawLine = (pointer: Point) => {
-    shape?.set({ x2: pointer.x, y2: pointer.y });
+    drawShape?.set({ x2: pointer.x, y2: pointer.y });
   };
   const changeShapeType = (type: DrawShapes) => {
-    if (shapeType === type || !canvas) return;
+    if (drawShapeType === type || !canvas) return;
 
-    setShapeType(type);
+    setDrawShapeType(type);
 
     if (!(canvas.freeDrawingBrush instanceof PencilBrush)) {
       const pencil = new PencilBrush(canvas);
@@ -182,18 +207,23 @@ const NavTools = () => {
     }
     canvas.isDrawingMode = type === DRAW_SHAPES.PENCIL;
   };
+  const clearCanvas = () => {
+    if (!canvas) return;
+
+    canvas.remove(...canvas.getObjects());
+  };
 
   useEffect(() => {
     if (!canvas) return;
 
     const handleMouseDown = (event: TPointerEventInfo<TPointerEvent>) => {
-      if (shapeType === DRAW_SHAPES.SELECT) return;
+      if (drawShapeType === DRAW_SHAPES.SELECT) return;
 
       setIsDrawing(true);
 
-      if (canvas.isDrawingMode || shapeType === DRAW_SHAPES.PENCIL) return;
+      if (canvas.isDrawingMode || drawShapeType === DRAW_SHAPES.PENCIL) return;
 
-      const objectShape = objectFactory(shapeType);
+      const objectShape = objectFactory(drawShapeType);
 
       const pointer = canvas.getViewportPoint(event.e);
 
@@ -207,7 +237,7 @@ const NavTools = () => {
       setOrigin({ x: pointer.x, y: pointer.y });
 
       canvas.add(objectShape);
-      setShape(objectShape);
+      setDrawShape(objectShape);
       canvas.requestRenderAll();
     };
 
@@ -218,7 +248,7 @@ const NavTools = () => {
 
       const pointer = canvas.getViewportPoint(event.e);
 
-      switch (shapeType) {
+      switch (drawShapeType) {
         case DRAW_SHAPES.ELLIPSE:
           handleMouseMoveDrawEllipse(pointer);
           break;
@@ -237,12 +267,12 @@ const NavTools = () => {
     const handleMouseUp = (_event: TPointerEventInfo<TPointerEvent>) => {
       if (!isDrawing) return;
 
-      if (shape) {
-        canvas.setActiveObject(shape);
+      if (drawShape) {
+        canvas.setActiveObject(drawShape);
       }
       setIsDrawing(false);
-      setShape(null);
-      setShapeType(DRAW_SHAPES.SELECT);
+      setDrawShape(null);
+      setDrawShapeType(DRAW_SHAPES.SELECT);
       canvas.isDrawingMode = false; // Pencil
     };
     const selectLastPath = ({ path }: { path: FabricObject }) => {
@@ -262,31 +292,40 @@ const NavTools = () => {
         canvas.off("path:created", selectLastPath);
       }
     };
-  }, [canvas, shapeType, shape, isDrawing]);
+  }, [canvas, drawShapeType, drawShape, isDrawing]);
+
+  const exportAsImage = exportCanvasAsImage(canvas);
 
   return (
-    <div className="flex p-2 gap-1">
+    <Panel className="flex p-2 gap-1 fixed left-1/2 -translate-x-1/2 top-4">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost">File</Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem>New Project</DropdownMenuItem>
+          <DropdownMenuItem onClick={clearCanvas}>New Project</DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuSub>
             <DropdownMenuSubTrigger>Export</DropdownMenuSubTrigger>
             <DropdownMenuPortal>
               <DropdownMenuSubContent>
-                <DropdownMenuItem>as PNG</DropdownMenuItem>
-                <DropdownMenuItem>as PNG 2x</DropdownMenuItem>
-                <DropdownMenuItem>as JPG</DropdownMenuItem>
-                <DropdownMenuItem>as SVG</DropdownMenuItem>
-                <DropdownMenuItem>as PDF</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportAsImage("png")}>as PNG</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportAsImage("png", 2)}>
+                  as PNG 2x
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportAsImage("jpeg")}>as JPG</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportAsImage("jpeg", 2)}>
+                  as JPG 2x
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportAsImage("webp")}>as WEBP</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => exportAsImage("webp", 2)}>
+                  as WEBP 2x
+                </DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>Clear Canvas</DropdownMenuItem>
+          <DropdownMenuItem onClick={clearCanvas}>Clear Canvas</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -307,7 +346,7 @@ const NavTools = () => {
 
       <Separator orientation="vertical" className="h-auto" />
 
-      <ToggleGroup type="single" value={shapeType} onValueChange={changeShapeType}>
+      <ToggleGroup type="single" value={drawShapeType} onValueChange={changeShapeType}>
         <ToggleGroupItem value={DRAW_SHAPES.SELECT}>
           <MousePointer2Icon />
         </ToggleGroupItem>
@@ -330,7 +369,7 @@ const NavTools = () => {
       <Button onClick={() => groupSelected(canvas)} variant="ghost" size="icon">
         <GroupIcon />
       </Button>
-      <Button onClick={() => unGroupSelected(canvas)} variant="ghost" size="icon">
+      <Button onClick={() => ungroupSelected(canvas)} variant="ghost" size="icon">
         <UngroupIcon />
       </Button>
       <Button onClick={() => cloneSelected(canvas)} variant="ghost" size="icon">
@@ -339,7 +378,7 @@ const NavTools = () => {
       <Button onClick={() => removeSelected(canvas)} variant="ghost" size="icon">
         <TrashIcon />
       </Button>
-    </div>
+    </Panel>
   );
 };
 

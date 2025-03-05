@@ -1,35 +1,42 @@
-# Nextjs 15 template
-- app rotuer
-- Tailwindcss
-- pnpm as package manager
-- eslint
-- Shadcn component library
+# Canvas Editor Lite
 
-Useful commands/scripts:
-- `pnpm dev` - start development server
-- `npx shadcn@latest add -a -y -o` - update all Shadcn components
+Canvas Editor Lite is a lightweight and powerful canvas editor built with Next.js and Fabric.js.
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Features
 
-## Getting Started
+- Lightweight and fast
+- Built with Next.js and Fabric.js
+- Styled with Tailwind CSS
+- Easy to use and extend
 
-First, run the development server:
+## Installation
 
-```bash
+To install the dependencies, run:
+
+```sh
+pnpm install
+```
+
+## Usage
+
+To start the development server, run:
+
+```sh
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+To build the project, run:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```sh
+pnpm build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+To start the production server, run:
 
-## Learn More
+```sh
+pnpm start
+```
 
-To learn more about Next.js, take a look at the following resources:
+## License
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+This project is licensed under the MIT License.

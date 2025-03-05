@@ -1,41 +1,28 @@
 "use client;";
 
-import NavTools from "./nav-tools";
 import CanvasBase from "./canvas-base";
-import CanvasSettings from "./canvas-settings";
-import FloatingPanel from "./floating-panel";
-import Layers from "./layers";
-import LayerSettings from "./layer-settings";
-// import CroppingSettings from "./cropping-settings";
-import { ThemeToggle } from "@/app/components/theme-toggle";
-import CanvasZoom from "./canvas-zoom";
 import CanvasContextMenu from "./canvas-context-menu";
+import CanvasSettings from "./canvas-settings";
+import CanvasZoom from "./canvas-zoom";
+import LayerSettings from "./layer-settings";
+import Layers from "./layers";
+import NavTools from "./nav-tools";
+import { ThemeToggle } from "@/app/components/theme-toggle";
+import "../lib/fabric";
 
 export type CanvasAppProps = {};
 
 function CanvasApp({}: CanvasAppProps) {
   return (
     <div>
-      <div className="z-20 relative">
-        <FloatingPanel className="fixed left-1/2 -translate-x-1/2 top-4">
-          <NavTools />
-        </FloatingPanel>
-        <FloatingPanel className="fixed left-4 top-1/2 -translate-y-1/2">
-          <Layers />
-        </FloatingPanel>
-        <div className="fixed top-1/2 -translate-y-1/2 right-4 flex flex-col gap-2">
-          <FloatingPanel>
-            <LayerSettings />
-          </FloatingPanel>
-
-          <FloatingPanel>
-            <CanvasSettings />
-          </FloatingPanel>
-          {/* <CroppingSettings /> */}
-        </div>
+      <div className="z-10 relative">
+        <NavTools />
+        <Layers />
+        <LayerSettings />
         <CanvasZoom />
-        <div className="fixed top-4 right-4">
+        <div className="fixed top-4 right-4 flex gap-2">
           <ThemeToggle />
+          <CanvasSettings />
         </div>
       </div>
       <CanvasContextMenu>

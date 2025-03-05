@@ -1,11 +1,9 @@
 "use client;";
 
-import { Button } from "@/components/ui/button";
-import { FabricObject, Group } from "fabric";
 import { ComponentProps, ComponentType, useCallback, useEffect, useState } from "react";
+
+import { FabricObject, Group } from "fabric";
 import {
-  ArrowUpIcon,
-  ArrowDownIcon,
   EyeIcon,
   TrashIcon,
   LockIcon,
@@ -19,13 +17,18 @@ import {
   SplineIcon,
   LayersIcon,
   ImageIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
 } from "lucide-react";
-import { ShapeType, useCanvasStore } from "../stores/canvas-store";
-import { useElementsStore } from "../stores/elements-store";
-import { useShallow } from "zustand/react/shallow";
-import { Separator } from "@/components/ui/separator";
+
+import Panel from "./panel";
+import { useCanvas } from "../hooks/useCanvas";
+import { isGroupObject } from "../utils/canvas/common";
+import { ShapeType } from "../utils/canvas/constants";
 import { clamp } from "../utils/numbers";
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
 import { Toggle } from "@/components/ui/toggle";
 
 export type LayerProps = {};
@@ -35,16 +38,10 @@ const isObjectInGroup = (object: FabricObject): boolean => {
 };
 
 function Layers({}: LayerProps) {
-  const canvas = useCanvasStore((state) => state.canvas);
-
-  const { elements, setElements } = useElementsStore(
-    useShallow((state) => ({
-      elements: state.elements,
-      setElements: state.setElements,
-    }))
-  );
+  const [canvas] = useCanvas();
 
   const [selectedLayers, setSelectedLayers] = useState<FabricObject["id"][]>([]);
+  const [elements, setElements] = useState<FabricObject[]>([]);
 
   const lockLayer = (element: FabricObject) => {
     if (!element || !canvas) return;
@@ -126,11 +123,6 @@ function Layers({}: LayerProps) {
     const objects = canvas.getObjects();
     const filteredObjects = objects.filter((obj) => !isObjectInGroup(obj));
 
-    // TODO: validate if zIndex is required
-    filteredObjects.forEach((object, index) => {
-      object.zIndex = index;
-    });
-
     setElements([...filteredObjects].reverse());
     canvas.requestRenderAll();
   };
@@ -190,28 +182,34 @@ function Layers({}: LayerProps) {
   }, [canvas]);
 
   return (
-    <div className="bg-background rounded shadow-md space-y-2 w-72">
-      <div className="flex justify-between items-center p-2">
-        <span>Layers</span>
-        <span className="flex gap-1">
-          <Button
-            onClick={() => moveLayers(1)}
-            size="icon"
-            disabled={!selectedLayers.length}
-            className="[&_svg]:size-3 w-8 h-8"
-          >
-            <ArrowUpIcon />
-          </Button>
-          <Button
-            onClick={() => moveLayers(-1)}
-            size="icon"
-            disabled={!selectedLayers.length}
-            className="[&_svg]:size-3 w-8 h-8"
-          >
-            <ArrowDownIcon />
-          </Button>
-        </span>
-      </div>
+    <Panel
+      header={
+        <>
+          <span>Layers</span>
+          <span className="flex gap-1">
+            <Button
+              onClick={() => moveLayers(1)}
+              size="icon"
+              variant="outline"
+              disabled={!selectedLayers.length}
+              className="w-8 h-8"
+            >
+              <ChevronUpIcon />
+            </Button>
+            <Button
+              onClick={() => moveLayers(-1)}
+              size="icon"
+              variant="outline"
+              disabled={!selectedLayers.length}
+              className="w-8 h-8"
+            >
+              <ChevronDownIcon />
+            </Button>
+          </span>
+        </>
+      }
+      className="w-72 fixed top-20 left-4"
+    >
       <Separator />
       <ScrollArea className="h-[40vh] p-2">
         <LayerTree
@@ -223,7 +221,7 @@ function Layers({}: LayerProps) {
           selectLayerInCanvas={selectLayerInCanvas}
         />
       </ScrollArea>
-    </div>
+    </Panel>
   );
 }
 
@@ -231,6 +229,7 @@ export default Layers;
 
 const LAYER_ITEM_ICON_MAP = {
   circle: CircleIcon,
+  ellipse: CircleIcon,
   textbox: TypeIcon,
   rect: SquareIcon,
   line: SlashIcon,
@@ -268,7 +267,7 @@ function LayerTree({
   className = "",
 }: LayerTreeProps) {
   return (
-    <ul className={`overflow-auto ${className}`}>
+    <ul className={`overflow-auto flex flex-col gap-1 ${className}`}>
       {layers.map((layer) => (
         <LayerTreeItem
           key={layer.id}
@@ -281,7 +280,7 @@ function LayerTree({
             selectLayerInCanvas(layer.id);
           }}
         >
-          {layer.type === "group" ? (
+          {isGroupObject(layer) ? (
             <LayerTree
               className="pl-4"
               layers={(layer as Group).getObjects()}
@@ -321,7 +320,7 @@ function LayerTreeItem({
     <li {...rest}>
       <div
         className={`${
-          selected ? "bg-neutral-500/10" : ""
+          selected ? "bg-accent text-accent-foreground" : ""
         } flex justify-between items-center p-1 rounded `}
       >
         <div className="flex gap-2 items-center capitalize text-sm">

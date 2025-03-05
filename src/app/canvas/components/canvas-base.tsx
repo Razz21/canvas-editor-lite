@@ -1,22 +1,16 @@
 import { useEffect, useRef } from "react";
-import { INIT_CANVAS_OPTIONS, useCanvasStore } from "../stores/canvas-store";
-import { Canvas } from "fabric";
-import { initAligningGuidelines } from "fabric/extensions";
-import { cloneSelected, removeSelected } from "../utils/canvas/actions";
 
-const handleKeyEvent = (canvas: Canvas) => (e: KeyboardEvent) => {
-  if (e.key === "Delete") {
-    removeSelected(canvas);
-  } else if (e.ctrlKey && e.key === "d") {
-    e.preventDefault();
-    cloneSelected(canvas);
-    e.stopPropagation();
-  }
-};
+import { Canvas, FabricObject } from "fabric";
+import { initAligningGuidelines } from "fabric/extensions";
+
+import { useCanvas } from "../hooks/useCanvas";
+import { useCanvasHotkeys } from "../hooks/useCanvasHotkeys";
+import { INIT_CANVAS_OPTIONS } from "../utils/canvas/constants";
 
 export default function CanvasBase() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const setCanvas = useCanvasStore((state) => state.setCanvas);
+  const [, setCanvas] = useCanvas();
+  useCanvasHotkeys();
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -25,33 +19,27 @@ export default function CanvasBase() {
 
     fabricCanvas.renderAll();
 
-    setCanvas(fabricCanvas);
-    // TODO: move this to a constructor
-    fabricCanvas.on("object:added", (event) => {
-      // ensure object has a name and id
-
+    function addIdToObject(event: { target: FabricObject }) {
       const obj = event.target;
       obj.name = obj.name ?? obj.type;
       obj.id = obj.id || `${obj.type}_${new Date().getTime()}`;
+    }
 
-      console.log("object:added", obj);
-    });
+    setCanvas(fabricCanvas);
 
-    const keyDownHandler = handleKeyEvent(fabricCanvas);
-    document.addEventListener("keydown", keyDownHandler);
-
+    fabricCanvas.on("object:added", addIdToObject);
     const clearAligningGuidelines = initAligningGuidelines(fabricCanvas, {});
 
     return () => {
       clearAligningGuidelines();
+      fabricCanvas.off("object:added", addIdToObject);
       fabricCanvas.dispose();
       setCanvas(null);
-      document.removeEventListener("keydown", keyDownHandler);
     };
   }, [setCanvas]);
 
   return (
-    <div className="origin-center border shadow-lg border-neutral-100">
+    <div className="origin-center border shadow-lg border-muted">
       <canvas ref={canvasRef} />
     </div>
   );
