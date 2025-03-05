@@ -1,7 +1,8 @@
 "use client;";
 
-import * as Controls from "./controls";
 import { Ellipse } from "fabric";
+
+import * as Controls from "./controls";
 
 export type EllipseControlsProps = {
   properties: Partial<Ellipse>;

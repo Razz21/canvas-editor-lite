@@ -1,7 +1,8 @@
 "use client;";
 
-import * as Controls from "./controls";
 import { Circle } from "fabric";
+
+import * as Controls from "./controls";
 
 export type CircleControlsProps = {
   properties: Partial<Circle>;

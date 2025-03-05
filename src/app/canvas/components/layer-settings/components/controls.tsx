@@ -1,9 +1,10 @@
 "use client;";
 
 import { ComponentProps, ComponentType, ReactNode, SVGProps, useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
+
+import { Color } from "fabric";
+
 import { Input } from "@/components/ui/input";
-import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -12,7 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Color } from "fabric";
+import { Slider } from "@/components/ui/slider";
+import { cn } from "@/lib/utils";
+
 
 export type ControlLabelProps = { label: ReactNode } & Omit<ComponentProps<"div">, "onChange">;
 

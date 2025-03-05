@@ -1,6 +1,7 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+
 import {
   Canvas,
   FabricObject,
@@ -25,10 +26,17 @@ import {
   TypeIcon,
   UngroupIcon,
 } from "lucide-react";
+
+import Panel from "./panel";
 import { useCanvasStore } from "../stores/canvas-store";
-import { useEffect, useState } from "react";
-import { Separator } from "@/components/ui/separator";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import {
+  cloneSelected,
+  groupSelected,
+  removeSelected,
+  ungroupSelected,
+} from "../utils/canvas/actions";
+import { objectFactory } from "../utils/canvas/object-factory";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,13 +48,8 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { objectFactory } from "../utils/canvas/object-factory";
-import {
-  cloneSelected,
-  groupSelected,
-  removeSelected,
-  unGroupSelected,
-} from "../utils/canvas/actions";
+import { Separator } from "@/components/ui/separator";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 function addRectangle(canvas: Canvas | null) {
   if (!canvas) return;
@@ -294,7 +297,7 @@ const NavTools = () => {
   const exportAsImage = exportCanvasAsImage(canvas);
 
   return (
-    <div className="flex p-2 gap-1">
+    <Panel className="flex p-2 gap-1 fixed left-1/2 -translate-x-1/2 top-4">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost">File</Button>
@@ -318,8 +321,6 @@ const NavTools = () => {
                 <DropdownMenuItem onClick={() => exportAsImage("webp", 2)}>
                   as WEBP 2x
                 </DropdownMenuItem>
-                <DropdownMenuItem disabled>as SVG</DropdownMenuItem>
-                <DropdownMenuItem disabled>as PDF</DropdownMenuItem>
               </DropdownMenuSubContent>
             </DropdownMenuPortal>
           </DropdownMenuSub>
@@ -368,7 +369,7 @@ const NavTools = () => {
       <Button onClick={() => groupSelected(canvas)} variant="ghost" size="icon">
         <GroupIcon />
       </Button>
-      <Button onClick={() => unGroupSelected(canvas)} variant="ghost" size="icon">
+      <Button onClick={() => ungroupSelected(canvas)} variant="ghost" size="icon">
         <UngroupIcon />
       </Button>
       <Button onClick={() => cloneSelected(canvas)} variant="ghost" size="icon">
@@ -377,7 +378,7 @@ const NavTools = () => {
       <Button onClick={() => removeSelected(canvas)} variant="ghost" size="icon">
         <TrashIcon />
       </Button>
-    </div>
+    </Panel>
   );
 };
 

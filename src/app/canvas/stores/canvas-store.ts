@@ -1,7 +1,7 @@
-import { create } from "zustand";
-import { devtools } from "zustand/middleware";
 import type { Canvas, CanvasOptions } from "fabric";
 import { produce } from "immer";
+import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 
 export const INIT_CANVAS_OPTIONS = {
   width: 500,

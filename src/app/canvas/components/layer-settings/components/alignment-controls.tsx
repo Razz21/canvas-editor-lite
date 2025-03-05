@@ -1,6 +1,7 @@
 "use client";
 
 import { ComponentType, SVGProps } from "react";
+
 import {
   AlignCenterHorizontalIcon,
   AlignCenterVerticalIcon,
@@ -9,8 +10,9 @@ import {
   AlignStartHorizontalIcon,
   AlignStartVerticalIcon,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+
 import { AlignmentDirection } from "@/app/canvas/utils/canvas/constants";
+import { Button } from "@/components/ui/button";
 
 const LAYER_ITEM_ICON_MAP = {
   left: AlignStartVerticalIcon,

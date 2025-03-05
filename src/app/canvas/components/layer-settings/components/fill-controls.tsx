@@ -1,7 +1,8 @@
 "use client;";
 
-import * as Controls from "./controls";
 import { FabricObject } from "fabric";
+
+import * as Controls from "./controls";
 
 export type FillControlsProps = {
   properties: Partial<FabricObject>;

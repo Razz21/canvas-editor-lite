@@ -1,10 +1,11 @@
 "use client";
 
 import * as React from "react";
+
 import * as SliderPrimitive from "@radix-ui/react-slider";
+import { cva, VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
-import { cva, VariantProps } from "class-variance-authority";
 
 const sliderTrackVariants = cva("relative w-full grow overflow-hidden rounded-full bg-accent", {
   variants: {
