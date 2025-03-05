@@ -16,7 +16,6 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 
-
 export type ControlLabelProps = { label: ReactNode } & Omit<ComponentProps<"div">, "onChange">;
 
 export function ControlLabel({ label, children, className, ...rest }: ControlLabelProps) {

@@ -7,7 +7,6 @@ import * as Controls from "./controls";
 import { Textarea } from "@/components/ui/textarea";
 import { Toggle } from "@/components/ui/toggle";
 
-
 export type TextBoxControlsProps = {
   properties: Partial<Textbox>;
   handleValueChange: (key: keyof Textbox) => (value: unknown) => void;
