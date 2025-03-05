@@ -3,7 +3,6 @@
 import NavTools from "./nav-tools";
 import CanvasBase from "./canvas-base";
 import CanvasSettings from "./canvas-settings";
-import FloatingPanel from "./floating-panel";
 import Layers from "./layers";
 import LayerSettings from "./layer-settings";
 // import CroppingSettings from "./cropping-settings";
@@ -16,21 +15,14 @@ export type CanvasAppProps = {};
 function CanvasApp({}: CanvasAppProps) {
   return (
     <div>
-      <div className="z-20 relative">
-        <FloatingPanel className="fixed left-1/2 -translate-x-1/2 top-4">
-          <NavTools />
-        </FloatingPanel>
+      <div className="z-10 relative">
+        <NavTools />
         <Layers />
         <LayerSettings />
-        <div className="fixed bottom-20 right-4 flex flex-col gap-2">
-          <FloatingPanel>
-            <CanvasSettings />
-          </FloatingPanel>
-          {/* <CroppingSettings /> */}
-        </div>
         <CanvasZoom />
-        <div className="fixed top-4 right-4">
+        <div className="fixed top-4 right-4 flex gap-2">
           <ThemeToggle />
+          <CanvasSettings />
         </div>
       </div>
       <CanvasContextMenu>

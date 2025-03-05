@@ -47,6 +47,7 @@ import {
   removeSelected,
   ungroupSelected,
 } from "../utils/canvas/actions";
+import Panel from "./panel";
 
 function addRectangle(canvas: Canvas | null) {
   if (!canvas) return;
@@ -294,7 +295,7 @@ const NavTools = () => {
   const exportAsImage = exportCanvasAsImage(canvas);
 
   return (
-    <div className="flex p-2 gap-1">
+    <Panel className="flex p-2 gap-1 fixed left-1/2 -translate-x-1/2 top-4">
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="ghost">File</Button>
@@ -375,7 +376,7 @@ const NavTools = () => {
       <Button onClick={() => removeSelected(canvas)} variant="ghost" size="icon">
         <TrashIcon />
       </Button>
-    </div>
+    </Panel>
   );
 };
 

@@ -8,6 +8,7 @@ body {
 
 @layer base {
   :root {
+    color-scheme: light dark;
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
     --card: 0 0% 100%;
@@ -44,6 +45,7 @@ body {
   }
 
   html[data-theme="dark"] {
+    color-scheme: dark;
     --background: 0 0% 3.9%;
     --foreground: 0 0% 98%;
     --card: 0 0% 3.9%;
@@ -79,6 +81,7 @@ body {
   }
 
   html[data-theme="midnight-galaxy"] {
+    color-scheme: dark;
     --background: 240 27% 12%;
     --foreground: 0 0% 98%;
     --card: 240 24% 16%;
@@ -161,6 +164,7 @@ body {
   }
 
   html[data-theme="ocean-depths"] {
+    color-scheme: dark;
     --background: 200 50% 12%;
     --foreground: 200 10% 98%;
     --card: 200 45% 16%;
@@ -189,6 +193,7 @@ body {
   }
 
   html[data-theme="aurora-nights"] {
+    color-scheme: dark;
     --background: 260 40% 12%;
     --foreground: 260 10% 98%;
     --card: 260 35% 16%;
@@ -216,6 +221,7 @@ body {
   }
 
   html[data-theme="purple"] {
+    color-scheme: light;
     --background: 0 0% 100%;
     --foreground: 224 71.4% 4.1%;
     --card: 0 0% 100%;
@@ -245,6 +251,7 @@ body {
   }
 
   html[data-theme="dark-purple"] {
+    color-scheme: dark;
     --background: 224 71.4% 4.1%;
     --foreground: 210 20% 98%;
     --card: 224 71.4% 4.1%;
@@ -270,6 +277,14 @@ body {
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
     --radius: 0.75rem;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 
@@ -280,6 +295,17 @@ body {
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  .canvas-page {
+    background-color: hsl(from hsl(var(--background)) h s calc(l - 10));
+    --grid-color: hsl(var(--muted) / 0.35);
+    background-image: linear-gradient(45deg, var(--grid-color) 25%, transparent 25%),
+      linear-gradient(135deg, var(--grid-color) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, var(--grid-color) 75%),
+      linear-gradient(135deg, transparent 75%, var(--grid-color) 75%);
+    background-size: 8rem 8rem;
+    background-position: 0px 0, 4rem 0, 4rem -4rem, 0px 4rem;
   }
 }
 

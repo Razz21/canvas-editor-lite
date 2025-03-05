@@ -5,10 +5,10 @@ import { useCanvasStore } from "../stores/canvas-store";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { RotateCcwIcon, ZoomInIcon, ZoomOutIcon } from "lucide-react";
-import FloatingPanel from "./floating-panel";
 import { clamp } from "../utils/numbers";
 import { Canvas, Point, TPointerEventInfo } from "fabric";
 import { debounce } from "lodash-es";
+import Panel from "./panel";
 
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 5;
@@ -124,9 +124,9 @@ function CanvasZoom({}: CanvasZoomProps) {
   };
 
   return (
-    <FloatingPanel className="fixed bottom-4 right-4">
+    <Panel className="fixed bottom-4 right-4">
       <div className="flex items-center gap-2 p-2">
-        <Button onClick={() => stepZoom(-0.1)} variant="outline" size="icon" className="w-9 h-9">
+        <Button onClick={() => stepZoom(-0.1)} variant="outline" size="icon">
           <ZoomOutIcon />
         </Button>
         <Input
@@ -147,7 +147,7 @@ function CanvasZoom({}: CanvasZoomProps) {
           <RotateCcwIcon />
         </Button>
       </div>
-    </FloatingPanel>
+    </Panel>
   );
 }
 
