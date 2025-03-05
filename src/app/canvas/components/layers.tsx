@@ -28,6 +28,8 @@ import { clamp } from "../utils/numbers";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Toggle } from "@/components/ui/toggle";
 import { ShapeType } from "../utils/canvas/constants";
+import Panel from "./panel";
+import { isGroupObject } from "../utils/canvas/common";
 
 export type LayerProps = {};
 
@@ -186,28 +188,34 @@ function Layers({}: LayerProps) {
   }, [canvas]);
 
   return (
-    <div className="space-y-2 w-72">
-      <div className="flex justify-between items-center p-2">
-        <span>Layers</span>
-        <span className="flex gap-1">
-          <Button
-            onClick={() => moveLayers(1)}
-            size="icon"
-            variant="ghost"
-            disabled={!selectedLayers.length}
-          >
-            <ChevronUpIcon />
-          </Button>
-          <Button
-            onClick={() => moveLayers(-1)}
-            size="icon"
-            variant="ghost"
-            disabled={!selectedLayers.length}
-          >
-            <ChevronDownIcon />
-          </Button>
-        </span>
-      </div>
+    <Panel
+      header={
+        <>
+          <span>Layers</span>
+          <span className="flex gap-1">
+            <Button
+              onClick={() => moveLayers(1)}
+              size="icon"
+              variant="outline"
+              disabled={!selectedLayers.length}
+              className="w-8 h-8"
+            >
+              <ChevronUpIcon />
+            </Button>
+            <Button
+              onClick={() => moveLayers(-1)}
+              size="icon"
+              variant="outline"
+              disabled={!selectedLayers.length}
+              className="w-8 h-8"
+            >
+              <ChevronDownIcon />
+            </Button>
+          </span>
+        </>
+      }
+      className="w-72 fixed top-20 left-4"
+    >
       <Separator />
       <ScrollArea className="h-[40vh] p-2">
         <LayerTree
@@ -219,7 +227,7 @@ function Layers({}: LayerProps) {
           selectLayerInCanvas={selectLayerInCanvas}
         />
       </ScrollArea>
-    </div>
+    </Panel>
   );
 }
 
@@ -265,7 +273,7 @@ function LayerTree({
   className = "",
 }: LayerTreeProps) {
   return (
-    <ul className={`overflow-auto ${className}`}>
+    <ul className={`overflow-auto flex flex-col gap-1 ${className}`}>
       {layers.map((layer) => (
         <LayerTreeItem
           key={layer.id}
@@ -278,7 +286,7 @@ function LayerTree({
             selectLayerInCanvas(layer.id);
           }}
         >
-          {layer.type === "group" ? (
+          {isGroupObject(layer) ? (
             <LayerTree
               className="pl-4"
               layers={(layer as Group).getObjects()}
@@ -318,7 +326,7 @@ function LayerTreeItem({
     <li {...rest}>
       <div
         className={`${
-          selected ? "bg-neutral-500/10" : ""
+          selected ? "bg-accent text-accent-foreground" : ""
         } flex justify-between items-center p-1 rounded `}
       >
         <div className="flex gap-2 items-center capitalize text-sm">
