@@ -106,6 +106,7 @@ function TextBoxControls({ handleValueChange, properties }: TextBoxControlsProps
           value={properties.fontSize ?? 0}
           onChange={handleValueChange("fontSize")}
           withSlider
+          unit="px"
         />
         <Controls.ControlInput
           label="Spacing"

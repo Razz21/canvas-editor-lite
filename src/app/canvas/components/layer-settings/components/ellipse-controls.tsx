@@ -18,6 +18,7 @@ function EllipseControls({ handleValueChange, properties }: EllipseControlsProps
           value={properties.rx ?? 0}
           onChange={handleValueChange("rx")}
           withSlider
+          unit="px"
         />
         <Controls.ControlInput
           label="Radius Y"
@@ -25,6 +26,7 @@ function EllipseControls({ handleValueChange, properties }: EllipseControlsProps
           value={properties.ry ?? 0}
           onChange={handleValueChange("ry")}
           withSlider
+          unit="px"
         />
       </Controls.ControlGrid>
     </Controls.ControlGroup>

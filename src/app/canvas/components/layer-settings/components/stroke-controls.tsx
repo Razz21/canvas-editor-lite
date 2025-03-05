@@ -24,6 +24,7 @@ function StrokeControls({ handleValueChange, properties }: StrokeControlsProps) 
           value={properties.strokeWidth ?? 0}
           onChange={handleValueChange("strokeWidth")}
           withSlider
+          unit="px"
         />
         <Controls.ControlSelect
           label="Line Cap"

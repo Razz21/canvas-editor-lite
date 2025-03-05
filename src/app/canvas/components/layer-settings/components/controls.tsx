@@ -36,7 +36,7 @@ export type ControlInputProps = {
   min?: number;
   max?: number;
   step?: number;
-  // unit?: string; // TODO
+  unit?: ReactNode;
   onChange: (value: number) => void;
   withSlider?: boolean;
   disabled?: boolean;
@@ -50,24 +50,29 @@ export function ControlInput({
   onChange,
   withSlider,
   disabled,
-  // unit,
+  unit,
   ...rest
 }: ControlInputProps) {
   return (
     <ControlLabel {...rest}>
       <div className="flex items-center gap-2">
-        <Input
-          value={value}
-          type="number"
-          className="w-16"
-          min={min}
-          max={max}
-          step={step}
-          onChange={(e) => onChange(Number(e.target.value.trim()))}
-          customSize="sm"
-          variant="secondary"
-          disabled={disabled}
-        />
+        <div
+          data-unit={unit}
+          className="relative before:absolute before:my-auto before:content-[attr(data-unit)] before:right-2 before:text-muted-foreground before:text-xs before:pointer-events-none before:flex before:items-center before:h-full hover:before:hidden focus-within:before:hidden"
+        >
+          <Input
+            value={value}
+            type="number"
+            className="w-16 "
+            min={min}
+            max={max}
+            step={step}
+            onChange={(e) => onChange(Number(e.target.value.trim()))}
+            customSize="sm"
+            variant="secondary"
+            disabled={disabled}
+          />
+        </div>
         {withSlider ? (
           <Slider
             value={[value]}

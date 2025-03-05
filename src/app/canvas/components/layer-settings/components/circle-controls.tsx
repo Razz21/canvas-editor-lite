@@ -18,6 +18,7 @@ function CircleControls({ handleValueChange, properties }: CircleControlsProps) 
           value={properties.radius ?? 0}
           onChange={handleValueChange("radius")}
           withSlider
+          unit="px"
         />
       </Controls.ControlGrid>
     </Controls.ControlGroup>

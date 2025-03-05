@@ -24,24 +24,28 @@ function PositionControls({
         step={1}
         value={properties.left ?? 0}
         onChange={handleValueChange("left")}
+        unit="px"
       />
       <Controls.ControlInput
         className="flex col-span-[2/-1]"
         label="Width"
         value={properties.width ?? 0}
         onChange={handleValueChange("width")}
+        unit="px"
       />
       <Controls.ControlInput
         className="flex col-span-[1/1]"
         label="Y"
         value={properties.top ?? 0}
         onChange={handleValueChange("top")}
+        unit="px"
       />
       <Controls.ControlInput
         className="flex col-span-[2/-1]"
         label="Height"
         value={properties.height ?? 0}
         onChange={handleValueChange("height")}
+        unit="px"
       />
       <Controls.ControlInput
         className="flex col-span-[1/1]"
@@ -49,6 +53,7 @@ function PositionControls({
         max={360}
         value={properties.angle ?? 0}
         onChange={handleAngleChange}
+        unit="°"
       />
       <Controls.ControlSelect
         label="Blend"
@@ -62,12 +67,13 @@ function PositionControls({
       />
       <Controls.ControlInput
         label="Opacity"
-        step={0.01}
+        step={1}
         min={0}
-        max={1}
-        value={properties.opacity ?? 0}
-        onChange={handleValueChange("opacity")}
+        max={100}
+        value={Math.round((properties.opacity ?? 0) * 100)}
+        onChange={(value) => handleValueChange("opacity")(+(value / 100).toFixed(2))}
         withSlider
+        unit="%"
       />
     </Controls.ControlGrid>
   );
