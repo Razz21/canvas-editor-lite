@@ -2,8 +2,8 @@
 
 import { PropsWithChildren, useEffect } from "react";
 
+import { useCanvas } from "../hooks/useCanvas";
 import { HOTKEY_ACTIONS } from "../hooks/useCanvasHotkeys";
-import { useCanvasStore } from "../stores/canvas-store";
 import {
   ContextMenu,
   ContextMenuContent,
@@ -12,7 +12,6 @@ import {
   ContextMenuShortcut,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-
 
 const contextMenuItems = [
   HOTKEY_ACTIONS.BRING_TO_FRONT,
@@ -31,7 +30,7 @@ const contextMenuItems = [
 export type CanvasContextMenuProps = PropsWithChildren & {};
 
 function CanvasContextMenu({ children }: CanvasContextMenuProps) {
-  const canvas = useCanvasStore((state) => state.canvas);
+  const [canvas] = useCanvas();
 
   useEffect(() => {
     if (!canvas) return;

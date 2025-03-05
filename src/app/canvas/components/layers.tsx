@@ -20,11 +20,9 @@ import {
   ChevronUpIcon,
   ChevronDownIcon,
 } from "lucide-react";
-import { useShallow } from "zustand/react/shallow";
 
 import Panel from "./panel";
-import { useCanvasStore } from "../stores/canvas-store";
-import { useElementsStore } from "../stores/elements-store";
+import { useCanvas } from "../hooks/useCanvas";
 import { isGroupObject } from "../utils/canvas/common";
 import { ShapeType } from "../utils/canvas/constants";
 import { clamp } from "../utils/numbers";
@@ -40,16 +38,10 @@ const isObjectInGroup = (object: FabricObject): boolean => {
 };
 
 function Layers({}: LayerProps) {
-  const canvas = useCanvasStore((state) => state.canvas);
-
-  const { elements, setElements } = useElementsStore(
-    useShallow((state) => ({
-      elements: state.elements,
-      setElements: state.setElements,
-    }))
-  );
+  const [canvas] = useCanvas();
 
   const [selectedLayers, setSelectedLayers] = useState<FabricObject["id"][]>([]);
+  const [elements, setElements] = useState<FabricObject[]>([]);
 
   const lockLayer = (element: FabricObject) => {
     if (!element || !canvas) return;

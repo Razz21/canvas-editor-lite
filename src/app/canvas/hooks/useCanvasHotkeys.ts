@@ -2,7 +2,7 @@ import { Canvas } from "fabric";
 import { keyBy } from "lodash-es";
 import { useHotkeys } from "react-hotkeys-hook";
 
-import { useCanvasStore } from "../stores/canvas-store";
+import { useCanvas } from "./useCanvas";
 import * as actions from "../utils/canvas/actions";
 
 type HotkeyAction = {
@@ -25,7 +25,7 @@ export const HOTKEY_ACTIONS = {
 export const hotkeysNormalized = keyBy(HOTKEY_ACTIONS, "hotkey");
 
 export function useCanvasHotkeys() {
-  const canvas = useCanvasStore((state) => state.canvas);
+  const [canvas] = useCanvas();
 
   return useHotkeys(
     Object.keys(hotkeysNormalized),

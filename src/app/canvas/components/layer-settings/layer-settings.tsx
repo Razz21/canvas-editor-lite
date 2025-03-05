@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Circle, Ellipse, FabricObject, Group, Rect, Textbox } from "fabric";
 
-import { useCanvasStore } from "../../stores/canvas-store";
 import Panel from "../panel";
 import { AlignmentControl } from "./components/alignment-controls";
 import CircleControls from "./components/circle-controls";
@@ -14,6 +13,7 @@ import FillControls from "./components/fill-controls";
 import PositionControls from "./components/position-controls";
 import StrokeControls from "./components/stroke-controls";
 import TextBoxControls from "./components/textbox-controls";
+import { useCanvas } from "../../hooks/useCanvas";
 import { getBoundingBox, isGroupOrSelectionObject } from "../../utils/canvas/common";
 import { AlignmentDirection } from "../../utils/canvas/constants";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -34,7 +34,7 @@ const initProperties = {
 export type LayerSettingsProps = {};
 
 function LayerSettings({}: LayerSettingsProps) {
-  const canvas = useCanvasStore((state) => state.canvas);
+  const [canvas] = useCanvas();
 
   const [selectedObject, setSelectedObject] = useState<FabricObject | Group | null>(null);
 

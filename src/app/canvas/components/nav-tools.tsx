@@ -28,7 +28,7 @@ import {
 } from "lucide-react";
 
 import Panel from "./panel";
-import { useCanvasStore } from "../stores/canvas-store";
+import { useCanvas } from "../hooks/useCanvas";
 import {
   cloneSelected,
   groupSelected,
@@ -153,7 +153,7 @@ const DRAW_SHAPES = {
 type DrawShapes = (typeof DRAW_SHAPES)[keyof typeof DRAW_SHAPES];
 
 const NavTools = () => {
-  const canvas = useCanvasStore((state) => state.canvas);
+  const [canvas] = useCanvas();
 
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [drawShape, setDrawShape] = useState<FabricObject | null>(null);

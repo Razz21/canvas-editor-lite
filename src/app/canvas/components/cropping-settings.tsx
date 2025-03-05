@@ -5,8 +5,7 @@ import { useEffect, useState } from "react";
 import { FabricObject } from "fabric";
 import { DownloadIcon } from "lucide-react";
 
-import { useCanvasStore } from "../stores/canvas-store";
-import { useElementsStore } from "../stores/elements-store";
+import { useCanvas } from "../hooks/useCanvas";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -19,8 +18,8 @@ import {
 export type CroppingSettingsProps = {};
 
 function CroppingSettings({}: CroppingSettingsProps) {
-  const canvas = useCanvasStore((state) => state.canvas);
-  const selectedId = useElementsStore((state) => state.selectedId);
+  const [canvas] = useCanvas();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const [frames, setFrames] = useState<FabricObject[]>([]);
   const [selectedFrame, setSelectedFrame] = useState<FabricObject | null>(null);

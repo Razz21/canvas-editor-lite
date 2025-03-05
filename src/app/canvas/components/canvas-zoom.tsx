@@ -7,7 +7,7 @@ import { debounce } from "lodash-es";
 import { RotateCcwIcon, ZoomInIcon, ZoomOutIcon } from "lucide-react";
 
 import Panel from "./panel";
-import { useCanvasStore } from "../stores/canvas-store";
+import { useCanvas } from "../hooks/useCanvas";
 import { clamp } from "../utils/numbers";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,7 +62,7 @@ const handleMouseUp = (canvas: Canvas) => () => {
 export type CanvasZoomProps = {};
 
 function CanvasZoom({}: CanvasZoomProps) {
-  const canvas = useCanvasStore((state) => state.canvas);
+  const [canvas] = useCanvas();
   const [zoom, setZoom] = useState<string | number>(canvas?.getZoom() ?? 1 * 100);
 
   useEffect(() => {

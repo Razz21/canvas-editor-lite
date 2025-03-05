@@ -5,16 +5,16 @@ import { useEffect, useState } from "react";
 import { Canvas, CanvasOptions } from "fabric";
 import { SettingsIcon } from "lucide-react";
 
-import { INIT_CANVAS_OPTIONS, useCanvasStore } from "../stores/canvas-store";
+import { useCanvas } from "../hooks/useCanvas";
 import * as Controls from "./layer-settings/components/controls";
+import { INIT_CANVAS_OPTIONS } from "../utils/canvas/constants";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-
 
 export type CanvasSettingsPanelProps = {};
 
 function CanvasSettingsPanel({}: CanvasSettingsPanelProps) {
-  const canvas = useCanvasStore((state) => state.canvas);
+  const [canvas] = useCanvas();
 
   const [properties, setProperties] = useState<Partial<Canvas>>({
     ...INIT_CANVAS_OPTIONS,

@@ -3,12 +3,13 @@ import { useEffect, useRef } from "react";
 import { Canvas, FabricObject } from "fabric";
 import { initAligningGuidelines } from "fabric/extensions";
 
+import { useCanvas } from "../hooks/useCanvas";
 import { useCanvasHotkeys } from "../hooks/useCanvasHotkeys";
-import { INIT_CANVAS_OPTIONS, useCanvasStore } from "../stores/canvas-store";
+import { INIT_CANVAS_OPTIONS } from "../utils/canvas/constants";
 
 export default function CanvasBase() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const setCanvas = useCanvasStore((state) => state.setCanvas);
+  const [, setCanvas] = useCanvas();
   useCanvasHotkeys();
 
   useEffect(() => {
