@@ -29,6 +29,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Toggle } from "@/components/ui/toggle";
 import { ShapeType } from "../utils/canvas/constants";
 import Panel from "./panel";
+import { isGroupObject } from "../utils/canvas/common";
 
 export type LayerProps = {};
 
@@ -272,7 +273,7 @@ function LayerTree({
   className = "",
 }: LayerTreeProps) {
   return (
-    <ul className={`overflow-auto ${className}`}>
+    <ul className={`overflow-auto flex flex-col gap-1 ${className}`}>
       {layers.map((layer) => (
         <LayerTreeItem
           key={layer.id}
@@ -285,7 +286,7 @@ function LayerTree({
             selectLayerInCanvas(layer.id);
           }}
         >
-          {layer.type === "group" ? (
+          {isGroupObject(layer) ? (
             <LayerTree
               className="pl-4"
               layers={(layer as Group).getObjects()}
@@ -325,7 +326,7 @@ function LayerTreeItem({
     <li {...rest}>
       <div
         className={`${
-          selected ? "bg-neutral-500/10" : ""
+          selected ? "bg-accent text-accent-foreground" : ""
         } flex justify-between items-center p-1 rounded `}
       >
         <div className="flex gap-2 items-center capitalize text-sm">
