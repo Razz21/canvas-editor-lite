@@ -1,9 +1,7 @@
 # Canvas Editor Lite
 
-<p align="left">
-    <img alt="GitHub deployments" src="https://img.shields.io/github/deployments/Razz21/canvas-editor-lite/main?logo=Vercel&label=Vercel">
-    <img alt="GitHub License" src="https://img.shields.io/github/license/Razz21/canvas-editor-lite">
-</p>
+[![Vercel](https://github.com/Razz21/canvas-editor-lite/actions/workflows/deployment.yml/badge.svg)](https://github.com/Razz21/canvas-editor-lite/actions/workflows/deployment.yml)
+![GitHub License](https://img.shields.io/github/license/Razz21/canvas-editor-lite)
 
 Canvas Editor Lite is a lightweight and powerful canvas editor built with Next.js and Fabric.js.
 
