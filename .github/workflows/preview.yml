@@ -1,0 +1,103 @@
+name: Vercel Preview Deployment
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+on:
+  push:
+    branches-ignore:
+      - main
+jobs:
+  Deploy-Preview:
+    runs-on: ubuntu-latest
+    outputs:
+      deploymentUrl: ${{ steps.deploy.outputs.deploymentUrl }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: "pnpm"
+      - name: Install Vercel CLI
+        run: pnpm add --global vercel@latest
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy Project Artifacts to Vercel
+        id: deploy
+        run: |
+          vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} > deploy.log
+          URL=$(cat deploy.log | grep -o 'https://[^ ]*.vercel.app' | head -n1)
+          echo "deploymentUrl=$URL" >> $GITHUB_OUTPUT
+
+  Add-Comment:
+    runs-on: ubuntu-latest
+    needs: Deploy-Preview
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Comment URL to PR
+        uses: actions/github-script@v7
+        id: comment-deployment-url-script
+        env:
+          DEPLOYMENT_URL: ${{ needs.Deploy-Preview.outputs.deploymentUrl }}
+        with:
+          script: |
+            const deploymentUrl = process.env.DEPLOYMENT_URL;
+            if (!deploymentUrl) {
+                console.log("No deployment URL found. Skipping comment.");
+                return;
+            }
+
+            // Fetch open pull requests related to this branch
+            const pullRequests = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                head: `${context.repo.owner}:${context.ref.replace('refs/heads/', '')}`
+            });
+
+            // Determine the PR number safely
+            const issueNumber = context.issue.number || (pullRequests.data.length > 0 ? pullRequests.data[0].number : null);
+            if (!issueNumber) {
+                console.log("No associated pull request found. Skipping comment.");
+                return;
+            }
+
+            // Fetch existing comments on the PR
+            const { data: comments } = await github.rest.issues.listComments({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issueNumber,
+            });
+
+            const botComment = comments.find(comment => {
+                return comment.user.type === 'Bot' && comment.body.includes('Deployed at');
+            });
+
+            const output = `🚀 **Preview Deployment Available:**\n\n[${deploymentUrl}](${deploymentUrl})`;
+
+            // Update existing comment or create a new one
+            if (botComment) {
+                await github.rest.issues.updateComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    comment_id: botComment.id,
+                    body: output
+                });
+                console.log("Updated existing deployment comment.");
+            } else {
+                await github.rest.issues.createComment({
+                    issue_number: issueNumber,
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    body: output
+                });
+                console.log("Created new deployment comment.");
+            }
